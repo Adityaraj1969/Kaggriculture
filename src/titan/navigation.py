@@ -3,7 +3,6 @@ TITAN-1 Spatial Navigation & Mesh Pathfinding
 FR-09, FR-10: Global walkable mesh navigation and priority targeting.
 """
 
-from typing import List, Set, Tuple
 
 
 def get_quadrant(x: int, y: int) -> int:
@@ -17,7 +16,7 @@ def get_quadrant(x: int, y: int) -> int:
     return 3
 
 
-def is_unlocked(x: int, y: int, uq: Set[int]) -> bool:
+def is_unlocked(x: int, y: int, uq: set[int]) -> bool:
     """Check if coordinate resides in currently unlocked quadrant."""
     return get_quadrant(x, y) in uq
 
@@ -27,7 +26,7 @@ def manhattan(x1: int, y1: int, x2: int, y2: int) -> int:
     return abs(x1 - x2) + abs(y1 - y2)
 
 
-def step_towards(cx: int, cy: int, tx: int, ty: int) -> List[str]:
+def step_towards(cx: int, cy: int, tx: int, ty: int) -> list[str]:
     """Single greedy step towards target coordinate over the global walkable mesh.
     All tiles are walkable in the engine; locked status only gates field actions.
     """
@@ -45,7 +44,7 @@ def step_towards(cx: int, cy: int, tx: int, ty: int) -> List[str]:
     return [best_dir]
 
 
-def nearest(wx: int, wy: int, tiles_list: List[Tuple[int, int]]) -> Tuple[int, int]:
+def nearest(wx: int, wy: int, tiles_list: list[tuple[int, int]]) -> tuple[int, int]:
     """Find nearest coordinate from a list of candidates."""
     if not tiles_list:
         return (0, 0)
@@ -55,12 +54,12 @@ def nearest(wx: int, wy: int, tiles_list: List[Tuple[int, int]]) -> Tuple[int, i
 def find_target(
     wx: int,
     wy: int,
-    urgent_water: List[Tuple[int, int]],
-    ready_harvest: List[Tuple[int, int]],
-    plantable: List[Tuple[int, int]],
-    unfed: List[Tuple[int, int]],
-    claimed: Set[Tuple[int, int]],
-) -> Tuple[int, int]:
+    urgent_water: list[tuple[int, int]],
+    ready_harvest: list[tuple[int, int]],
+    plantable: list[tuple[int, int]],
+    unfed: list[tuple[int, int]],
+    claimed: set[tuple[int, int]],
+) -> tuple[int, int]:
     """Find the nearest high-priority unclaimed task tile."""
     for tile_list in [unfed, urgent_water, ready_harvest, plantable]:
         unclaimed = [t for t in tile_list if t not in claimed]

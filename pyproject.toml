@@ -1,4 +1,4 @@
-﻿[build-system]
+[build-system]
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
@@ -42,6 +42,7 @@ select = [
 ignore = [
     "E501",  # Line too long (handled by formatter)
     "B008",  # Do not perform function calls in argument defaults
+    "E701",  # Multiple statements on one line (colon)
 ]
 
 [tool.mypy]

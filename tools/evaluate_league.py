@@ -6,6 +6,7 @@ Evaluates the candidate against built-in archetypes ('starter', 'random') and ou
 import argparse
 import os
 import sys
+
 from kaggle_environments import make
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))

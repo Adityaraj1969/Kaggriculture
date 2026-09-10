@@ -1,10 +1,10 @@
-﻿"""
+"""
 TITAN-1 Autonomous Agro-Economic Agent Kernel
 Championship submission driver verified on official kaggriculture simulation engine.
 """
 
 import time
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any
 
 from .constants import (
     CROPS,
@@ -40,10 +40,10 @@ class TitanRuntimeState:
 _RUNTIME = TitanRuntimeState()
 
 
-def agent(obs: Dict[str, Any], config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+def agent(obs: dict[str, Any], config: dict[str, Any] | None = None) -> dict[str, Any]:
     """TITAN-1 Championship Agent. Sub-40ms execution, zero-crash guarantee."""
     t0 = time.perf_counter()
-    FALLBACK: Dict[str, Any] = {"farmer": ["PASS"], "hands": [], "market": []}
+    FALLBACK: dict[str, Any] = {"farmer": ["PASS"], "hands": [], "market": []}
 
     try:
         # ==== 1. PERCEPTION ====
@@ -77,7 +77,7 @@ def agent(obs: Dict[str, Any], config: Optional[Dict[str, Any]] = None) -> Dict[
         _RUNTIME.prev_step = step
 
         # Quadrants currently unlocked
-        uq: Set[int] = {0}
+        uq: set[int] = {0}
         for q in my_farm.get("unlocked_quadrants", ["NW"]):
             if isinstance(q, int) and 0 <= q <= 3:
                 uq.add(q)
@@ -107,17 +107,17 @@ def agent(obs: Dict[str, Any], config: Optional[Dict[str, Any]] = None) -> Dict[
         posture = _RUNTIME.posture
 
         # ==== 3. TILE SURVEY & LOGISTICS PRIORITY QUEUE ====
-        urgent_water: List[Tuple[int, int]] = []
-        ready_harvest: List[Tuple[int, int]] = []
-        plantable: List[Tuple[int, int]] = []
-        weed_tiles: List[Tuple[int, int]] = []
-        animal_tiles: List[Tuple[int, int]] = []
-        unfed_animals: List[Tuple[int, int]] = []
-        empty_structs: List[Tuple[int, int]] = []
-        unfert_melon: List[Tuple[int, int]] = []
-        harvestable_animal: List[Tuple[int, int]] = []
-        fert_avail: List[Tuple[int, int]] = []
-        all_structs: List[Tuple[int, int]] = []
+        urgent_water: list[tuple[int, int]] = []
+        ready_harvest: list[tuple[int, int]] = []
+        plantable: list[tuple[int, int]] = []
+        weed_tiles: list[tuple[int, int]] = []
+        animal_tiles: list[tuple[int, int]] = []
+        unfed_animals: list[tuple[int, int]] = []
+        empty_structs: list[tuple[int, int]] = []
+        unfert_melon: list[tuple[int, int]] = []
+        harvestable_animal: list[tuple[int, int]] = []
+        fert_avail: list[tuple[int, int]] = []
+        all_structs: list[tuple[int, int]] = []
 
         for y in range(10):
             if y >= len(tiles):
@@ -176,10 +176,10 @@ def agent(obs: Dict[str, Any], config: Optional[Dict[str, Any]] = None) -> Dict[
         has_any_struct = len(all_structs) > 0
 
         # ==== 4. HIGH-FREQUENCY ORDER TAPE & MARKET LIQUIDATION ====
-        market_orders: List[List[Any]] = []
+        market_orders: list[list[Any]] = []
 
         # (A) Leaky-Bucket Liquidation
-        sell_list: List[Tuple[float, str, int]] = []
+        sell_list: list[tuple[float, str, int]] = []
         for item in PRODUCTS:
             stock = shed.get(item, 0)
             if stock <= 0:
@@ -194,8 +194,8 @@ def agent(obs: Dict[str, Any], config: Optional[Dict[str, Any]] = None) -> Dict[
             if avail <= 0:
                 continue
             dh = _RUNTIME.tracker.get_dump_hazard(item)
-            bp = MARKET_PARAMS.get(item, {}).get("base", 50)
-            sell_list.append((dh * 100 + bp, item, avail))
+            bp = float(MARKET_PARAMS.get(item, {}).get("base", 50))
+            sell_list.append((dh * 100.0 + bp, item, avail))
 
         sell_list.sort(key=lambda x: x[0], reverse=True)
         for _, item, avail in sell_list:
@@ -205,7 +205,7 @@ def agent(obs: Dict[str, Any], config: Optional[Dict[str, Any]] = None) -> Dict[
                 qty = avail
             else:
                 ci = market_inv.get(item, MARKET_I0)
-                T = MARKET_PARAMS[item]["T"]
+                T = float(MARKET_PARAMS[item]["T"])
                 if item in FRAGILE_COMMODITIES:
                     headroom = max(1, min(15, int(T * 0.35 - max(0, ci - MARKET_I0))))
                 else:
@@ -354,17 +354,17 @@ def agent(obs: Dict[str, Any], config: Optional[Dict[str, Any]] = None) -> Dict[
                 if len(market_orders) >= 10:
                     break
                 cur = seeds.get(crop, 0)
-                tgt = 6 if crop in ("WHEAT", "CARROT") else 2
-                deficit = tgt - cur
+                target_stock = 6 if crop in ("WHEAT", "CARROT") else 2
+                deficit = target_stock - cur
                 if deficit > 0 and my_money >= deficit * CROPS[crop]["seed"] + 500:
                     market_orders.append(["BUY_SEED", crop, deficit])
                     my_money -= deficit * CROPS[crop]["seed"]
 
         # ==== 5. SPATIAL DISPATCH & WORKER MICRO ====
         all_workers = [my_farm.get("farmer", [0, 0])] + my_farm.get("hands", [])
-        wactions: List[List[Any]] = []
-        claimed: Set[Tuple[int, int]] = set()
-        seeds_used: Dict[str, int] = {}
+        wactions: list[list[Any]] = []
+        claimed: set[tuple[int, int]] = set()
+        seeds_used: dict[str, int] = {}
 
         for widx, pos in enumerate(all_workers):
             if (time.perf_counter() - t0) * 1000 > 35:
@@ -381,7 +381,7 @@ def agent(obs: Dict[str, Any], config: Optional[Dict[str, Any]] = None) -> Dict[
             if ct == "LOCKED":
                 ct = None
             winv = inventories[widx] if widx < len(inventories) else {}
-            act: List[Any] = ["PASS"]
+            act: list[Any] = ["PASS"]
 
             is_shed_adj = (wx, wy) in SHED_ACCESS_TILES
             on_unlocked = is_unlocked(wx, wy, uq)

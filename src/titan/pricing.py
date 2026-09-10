@@ -1,10 +1,11 @@
-﻿"""
+"""
 TITAN-1 Market Micro-Structure & Exact Price Simulation
 Replicates the official continuous non-linear elasticity formulation.
 """
 
 import math
-from .constants import HINGE_GAIN, MARKET_I0, MARKET_PARAMS, PRICE_FLOOR
+
+from .constants import HINGE_GAIN, MARKET_PARAMS, PRICE_FLOOR
 
 
 def shape(func: str, x: float, T: float = 0.0) -> float:
@@ -31,16 +32,18 @@ def shape(func: str, x: float, T: float = 0.0) -> float:
 def market_price(item: str, inventory: int) -> int:
     """Compute exact spot market price matching the engine. Floored at PRICE_FLOOR."""
     p = MARKET_PARAMS[item]
-    base = p["base"]
-    I0 = p["I0"]
-    T = p["T"]
+    base = float(p["base"])
+    I0 = float(p["I0"])
+    T = float(p["T"])
     if inventory < I0:
-        f = p["below_func"]
-        amp = p["below_target"] * base / shape(f, T, T)
+        f = str(p["below_func"])
+        below_target = float(p["below_target"])
+        amp = below_target * base / shape(f, T, T)
         price = base + amp * shape(f, I0 - inventory, T)
     else:
-        f = p["above_func"]
-        amp = p["above_target"] * base / shape(f, T, T)
+        f = str(p["above_func"])
+        above_target = float(p["above_target"])
+        amp = above_target * base / shape(f, T, T)
         price = base - amp * shape(f, inventory - I0, T)
     return max(PRICE_FLOOR, int(round(price)))
 

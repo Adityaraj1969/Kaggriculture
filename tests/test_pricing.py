@@ -1,10 +1,10 @@
-﻿import sys
-import os
+﻿import os
+import sys
 import unittest
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
-from titan.pricing import market_price, shape, compute_sell_revenue
-from titan.constants import MARKET_PARAMS, MARKET_I0, PRICE_FLOOR
+from titan.constants import MARKET_I0, MARKET_PARAMS, PRICE_FLOOR
+from titan.pricing import compute_sell_revenue, market_price
 
 
 class TestMarketPricing(unittest.TestCase):

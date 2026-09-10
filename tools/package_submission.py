@@ -6,6 +6,7 @@ Validates Kaggle submission constraints and generates certified archives.
 import os
 import sys
 import tarfile
+
 from kaggle_environments import make
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -66,8 +67,8 @@ def verify_submission():
 
     print("=" * 80)
     print("[SUCCESS] CERTIFIED READY FOR KAGGLE SUBMISSION.")
-    print(f"Direct CLI upload command:")
-    print(f"  kaggle competitions submit -c kaggriculture -f main.py -m 'TITAN-1 v2.0 Release'")
+    print("Direct CLI upload command:")
+    print("  kaggle competitions submit -c kaggriculture -f main.py -m 'TITAN-1 v2.0 Release'")
     print("=" * 80)
     return True
 

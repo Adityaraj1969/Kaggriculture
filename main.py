@@ -7,13 +7,13 @@ SPONSOR: GOOGLE LLC | PLATFORM: KAGGLE COMPETITIONS ($50,000 TOURNAMENT POOL)
 
 import math
 import time
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any
 
 # ==============================================================================================
 # CANONICAL ENGINE CONSTANTS (Rules.md, kaggriculture.py)
 # ==============================================================================================
 
-CROPS = {
+CROPS: dict[str, dict[str, Any]] = {
     "WHEAT":      {"seed": 10, "first_yield_day": 2, "max_yield_day": 4, "interval": 0, "max_yield": 6, "ongoing": False},
     "CARROT":     {"seed": 20, "first_yield_day": 2, "max_yield_day": 3, "interval": 0, "max_yield": 4, "ongoing": False},
     "TOMATO":     {"seed": 50, "first_yield_day": 8, "max_yield_day": 8, "interval": 1, "max_yield": 4, "ongoing": True},
@@ -21,7 +21,7 @@ CROPS = {
     "MELON":      {"seed": 80, "first_yield_day": 10, "max_yield_day": 12, "interval": 0, "max_yield": 6, "ongoing": False},
 }
 
-ANIMALS = {
+ANIMALS: dict[str, dict[str, Any]] = {
     "GOOSE": {"cost": 300, "structure": "COOP",    "first_yield_day": 4, "interval": 1, "max_held": 4, "product": "EGG"},
     "COW":   {"cost": 400, "structure": "PASTURE", "first_yield_day": 8, "interval": 2, "max_held": 6, "product": "MILK"},
     "SHEEP": {"cost": 500, "structure": "PASTURE", "first_yield_day": 6, "interval": 3, "max_held": 6, "product": "WOOL"},
@@ -34,7 +34,7 @@ MARKET_I0 = 10000
 PRICE_FLOOR = 1
 HINGE_GAIN = 8.0
 
-MARKET_PARAMS = {
+MARKET_PARAMS: dict[str, dict[str, Any]] = {
     "WHEAT":      {"base":  25, "I0": MARKET_I0, "T": 400, "below_func": "sqrt",   "below_target": 0.80, "above_func": "log",    "above_target": 0.20},
     "CARROT":     {"base":  35, "I0": MARKET_I0, "T": 450, "below_func": "hinge",  "below_target": 1.00, "above_func": "sqrt",   "above_target": 0.70},
     "TOMATO":     {"base":  60, "I0": MARKET_I0, "T": 200, "below_func": "hinge",  "below_target": 0.40, "above_func": "sqrt",   "above_target": 0.60},
@@ -106,16 +106,18 @@ def _shape(func: str, x: float, T: float = 0.0) -> float:
 def market_price(item: str, inventory: int) -> int:
     """Compute exact market price matching the engine. Floor at PRICE_FLOOR."""
     p = MARKET_PARAMS[item]
-    base = p["base"]
-    I0 = p["I0"]
-    T = p["T"]
+    base = float(p["base"])
+    I0 = float(p["I0"])
+    T = float(p["T"])
     if inventory < I0:
-        f = p["below_func"]
-        amp = p["below_target"] * base / _shape(f, T, T)
+        f = str(p["below_func"])
+        below_target = float(p["below_target"])
+        amp = below_target * base / _shape(f, T, T)
         price = base + amp * _shape(f, I0 - inventory, T)
     else:
-        f = p["above_func"]
-        amp = p["above_target"] * base / _shape(f, T, T)
+        f = str(p["above_func"])
+        above_target = float(p["above_target"])
+        amp = above_target * base / _shape(f, T, T)
         price = base - amp * _shape(f, inventory - I0, T)
     return max(PRICE_FLOOR, int(round(price)))
 
@@ -129,13 +131,13 @@ class BayesianOpponentTracker:
 
     def __init__(self) -> None:
         self.commodities = [p for p in PRODUCTS if p != "FERTILIZER"]
-        self.hoarded_shed_est: Dict[str, int] = {c: 0 for c in self.commodities}
-        self.prev_opp_tiles: Optional[List[List[Any]]] = None
-        self.prev_market_inv: Optional[Dict[str, int]] = None
-        self.our_sales: Dict[str, int] = {c: 0 for c in self.commodities}
-        self.our_buys: Dict[str, int] = {c: 0 for c in self.commodities}
+        self.hoarded_shed_est: dict[str, int] = {c: 0 for c in self.commodities}
+        self.prev_opp_tiles: list[list[Any]] | None = None
+        self.prev_market_inv: dict[str, int] | None = None
+        self.our_sales: dict[str, int] = {c: 0 for c in self.commodities}
+        self.our_buys: dict[str, int] = {c: 0 for c in self.commodities}
 
-    def record_own_orders(self, orders: List[List[Any]]) -> None:
+    def record_own_orders(self, orders: list[list[Any]]) -> None:
         self.our_sales = {c: 0 for c in self.commodities}
         self.our_buys = {c: 0 for c in self.commodities}
         for cmd in orders:
@@ -147,8 +149,8 @@ class BayesianOpponentTracker:
             elif act in ("BUY_PRODUCT",) and item in self.our_buys:
                 self.our_buys[item] += qty
 
-    def update(self, opp_tiles: Optional[List[List[Any]]], market_inv: Dict[str, int],
-               step: int, shops: List[str]) -> None:
+    def update(self, opp_tiles: list[list[Any]] | None, market_inv: dict[str, int],
+               step: int, shops: list[str]) -> None:
         # Detect opponent harvests
         if self.prev_opp_tiles is not None and opp_tiles is not None:
             for y in range(min(10, len(opp_tiles))):
@@ -177,8 +179,8 @@ class BayesianOpponentTracker:
         self.prev_opp_tiles = [row[:] for row in opp_tiles] if opp_tiles else None
         self.prev_market_inv = dict(market_inv) if market_inv else None
 
-    def _calc_town_drain(self, step: int, shops: List[str]) -> Dict[str, int]:
-        drain: Dict[str, int] = {c: 0 for c in self.commodities}
+    def _calc_town_drain(self, step: int, shops: list[str]) -> dict[str, int]:
+        drain: dict[str, int] = {c: 0 for c in self.commodities}
         if step % 24 == 0:
             for c in self.commodities:
                 drain[c] += 1
@@ -207,7 +209,7 @@ def _get_quadrant(x: int, y: int) -> int:
     return 3
 
 
-def _is_unlocked(x: int, y: int, uq: Set[int]) -> bool:
+def _is_unlocked(x: int, y: int, uq: set[int]) -> bool:
     return _get_quadrant(x, y) in uq
 
 
@@ -215,7 +217,7 @@ def _manhattan(x1: int, y1: int, x2: int, y2: int) -> int:
     return abs(x1 - x2) + abs(y1 - y2)
 
 
-def _step_towards(cx: int, cy: int, tx: int, ty: int) -> List[str]:
+def _step_towards(cx: int, cy: int, tx: int, ty: int) -> list[str]:
     """Single greedy step towards target. All tiles are walkable (engine allows
     movement onto locked tiles; only field actions are blocked)."""
     if cx == tx and cy == ty:
@@ -232,7 +234,7 @@ def _step_towards(cx: int, cy: int, tx: int, ty: int) -> List[str]:
     return [best_dir]
 
 
-def _nearest(wx: int, wy: int, tiles_list: List[Tuple[int, int]]) -> Tuple[int, int]:
+def _nearest(wx: int, wy: int, tiles_list: list[tuple[int, int]]) -> tuple[int, int]:
     """Find nearest tile from a list."""
     if not tiles_list:
         return (0, 0)
@@ -240,11 +242,11 @@ def _nearest(wx: int, wy: int, tiles_list: List[Tuple[int, int]]) -> Tuple[int, 
 
 
 def _find_target(wx: int, wy: int,
-                 urgent_water: List[Tuple[int, int]],
-                 ready_harvest: List[Tuple[int, int]],
-                 plantable: List[Tuple[int, int]],
-                 unfed: List[Tuple[int, int]],
-                 claimed: Set[Tuple[int, int]]) -> Tuple[int, int]:
+                 urgent_water: list[tuple[int, int]],
+                 ready_harvest: list[tuple[int, int]],
+                 plantable: list[tuple[int, int]],
+                 unfed: list[tuple[int, int]],
+                 claimed: set[tuple[int, int]]) -> tuple[int, int]:
     """Find the nearest high-priority unclaimed task tile."""
     for tile_list in [unfed, urgent_water, ready_harvest, plantable]:
         unclaimed = [t for t in tile_list if t not in claimed]
@@ -258,7 +260,7 @@ def _find_target(wx: int, wy: int,
 # ==============================================================================================
 
 def _get_plant_order(posture: str, day: int, days_left: int,
-                     shed: Dict[str, int]) -> List[str]:
+                     shed: dict[str, int]) -> list[str]:
     """Returns ordered list of crops to plant based on posture and timing."""
     if posture == "AUTARKY":
         return ["WHEAT"]
@@ -267,7 +269,7 @@ def _get_plant_order(posture: str, day: int, days_left: int,
     if posture == "ENDGAME":
         return ["WHEAT", "CARROT"] if days_left >= 3 else []
     if posture == "TRAILING":
-        result: List[str] = []
+        result: list[str] = []
         if days_left >= 12: result.append("MELON")
         if days_left >= 16: result.append("STRAWBERRY")
         if days_left >= 11: result.append("TOMATO")
@@ -288,16 +290,16 @@ def _get_plant_order(posture: str, day: int, days_left: int,
 # MARKET HEALTH INDEX (FR-20)
 # ==============================================================================================
 
-def _compute_mhi(market_inv: Dict[str, int]) -> Tuple[float, float]:
+def _compute_mhi(market_inv: dict[str, int]) -> tuple[float, float]:
     """Returns (MHI_aggregate, MHI_fragile)."""
-    ratios: List[float] = []
-    fragile: List[float] = []
+    ratios: list[float] = []
+    fragile: list[float] = []
     for item in PRODUCTS:
         if item == "FERTILIZER":
             continue
         inv = market_inv.get(item, MARKET_I0)
         price = market_price(item, inv)
-        base = MARKET_PARAMS[item]["base"]
+        base = float(MARKET_PARAMS[item]["base"])
         r = price / base
         ratios.append(r)
         if item in FRAGILE_COMMODITIES:
@@ -330,10 +332,10 @@ _ST = _TitanState()
 # MAIN AGENT ENTRY POINT
 # ==============================================================================================
 
-def agent(obs: Dict[str, Any], config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+def agent(obs: dict[str, Any], config: dict[str, Any] | None = None) -> dict[str, Any]:
     """TITAN-1 Championship Agent. Sub-40ms execution, zero-crash guarantee."""
     t0 = time.perf_counter()
-    FALLBACK: Dict[str, Any] = {"farmer": ["PASS"], "hands": [], "market": []}
+    FALLBACK: dict[str, Any] = {"farmer": ["PASS"], "hands": [], "market": []}
 
     try:
         # ==== PERCEPTION ====
@@ -367,7 +369,7 @@ def agent(obs: Dict[str, Any], config: Optional[Dict[str, Any]] = None) -> Dict[
         _ST.prev_step = step
 
         # Unlocked quadrants
-        uq: Set[int] = {0}
+        uq: set[int] = {0}
         for q in my_farm.get("unlocked_quadrants", ["NW"]):
             if isinstance(q, int) and 0 <= q <= 3: uq.add(q)
             elif q == "NW": uq.add(0)
@@ -392,17 +394,17 @@ def agent(obs: Dict[str, Any], config: Optional[Dict[str, Any]] = None) -> Dict[
         posture = _ST.posture
 
         # ==== TILE SURVEY ====
-        urgent_water: List[Tuple[int, int]] = []
-        ready_harvest: List[Tuple[int, int]] = []
-        plantable: List[Tuple[int, int]] = []
-        weed_tiles: List[Tuple[int, int]] = []
-        animal_tiles: List[Tuple[int, int]] = []
-        unfed_animals: List[Tuple[int, int]] = []
-        empty_structs: List[Tuple[int, int]] = []
-        unfert_melon: List[Tuple[int, int]] = []
-        harvestable_animal: List[Tuple[int, int]] = []
-        fert_avail: List[Tuple[int, int]] = []
-        all_structs: List[Tuple[int, int]] = []
+        urgent_water: list[tuple[int, int]] = []
+        ready_harvest: list[tuple[int, int]] = []
+        plantable: list[tuple[int, int]] = []
+        weed_tiles: list[tuple[int, int]] = []
+        animal_tiles: list[tuple[int, int]] = []
+        unfed_animals: list[tuple[int, int]] = []
+        empty_structs: list[tuple[int, int]] = []
+        unfert_melon: list[tuple[int, int]] = []
+        harvestable_animal: list[tuple[int, int]] = []
+        fert_avail: list[tuple[int, int]] = []
+        all_structs: list[tuple[int, int]] = []
 
         for y in range(10):
             if y >= len(tiles): break
@@ -453,10 +455,10 @@ def agent(obs: Dict[str, Any], config: Optional[Dict[str, Any]] = None) -> Dict[
         has_any_struct = len(all_structs) > 0
 
         # ==== MARKET ORDERS ====
-        market_orders: List[List[Any]] = []
+        market_orders: list[list[Any]] = []
 
         # (A) LEAKY-BUCKET SELLING (FR-14, FR-15, FR-16, FR-17)
-        sell_list: List[Tuple[float, str, int]] = []
+        sell_list: list[tuple[float, str, int]] = []
         for item in PRODUCTS:
             stock = shed.get(item, 0)
             if stock <= 0: continue
@@ -469,8 +471,8 @@ def agent(obs: Dict[str, Any], config: Optional[Dict[str, Any]] = None) -> Dict[
             avail = max(0, stock - reserve)
             if avail <= 0: continue
             dh = _ST.tracker.get_dump_hazard(item)
-            bp = MARKET_PARAMS.get(item, {}).get("base", 50)
-            sell_list.append((dh * 100 + bp, item, avail))
+            bp = float(MARKET_PARAMS.get(item, {}).get("base", 50))
+            sell_list.append((dh * 100.0 + bp, item, avail))
 
         sell_list.sort(key=lambda x: x[0], reverse=True)
         for _, item, avail in sell_list:
@@ -479,7 +481,7 @@ def agent(obs: Dict[str, Any], config: Optional[Dict[str, Any]] = None) -> Dict[
                 qty = avail
             else:
                 ci = market_inv.get(item, MARKET_I0)
-                T = MARKET_PARAMS[item]["T"]
+                T = float(MARKET_PARAMS[item]["T"])
                 if item in FRAGILE_COMMODITIES:
                     headroom = max(1, min(15, int(T * 0.35 - max(0, ci - MARKET_I0))))
                 else:
@@ -578,17 +580,17 @@ def agent(obs: Dict[str, Any], config: Optional[Dict[str, Any]] = None) -> Dict[
                 if day > LAST_PLANT_DAY.get(crop, 30): continue
                 if len(market_orders) >= 10: break
                 cur = seeds.get(crop, 0)
-                tgt = 6 if crop in ("WHEAT", "CARROT") else 2
-                deficit = tgt - cur
+                target_stock = 6 if crop in ("WHEAT", "CARROT") else 2
+                deficit = target_stock - cur
                 if deficit > 0 and my_money >= deficit * CROPS[crop]["seed"] + 500:
                     market_orders.append(["BUY_SEED", crop, deficit])
                     my_money -= deficit * CROPS[crop]["seed"]
 
         # ==== WORKER DISPATCH ====
         all_workers = [my_farm.get("farmer", [0, 0])] + my_farm.get("hands", [])
-        wactions: List[List[Any]] = []
-        claimed: Set[Tuple[int, int]] = set()
-        seeds_used: Dict[str, int] = {}
+        wactions: list[list[Any]] = []
+        claimed: set[tuple[int, int]] = set()
+        seeds_used: dict[str, int] = {}
 
         for widx, pos in enumerate(all_workers):
             if (time.perf_counter() - t0) * 1000 > 35:
@@ -601,7 +603,7 @@ def agent(obs: Dict[str, Any], config: Optional[Dict[str, Any]] = None) -> Dict[
             if ct == "LOCKED":
                 ct = None  # normalize for branching; movement is legal, actions are no-ops
             winv = inventories[widx] if widx < len(inventories) else {}
-            act: List[Any] = ["PASS"]
+            act: list[Any] = ["PASS"]
 
             is_shed_adj = (wx, wy) in SHED_ACCESS_TILES
             on_unlocked = _is_unlocked(wx, wy, uq)

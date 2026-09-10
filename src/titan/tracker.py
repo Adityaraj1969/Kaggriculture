@@ -4,7 +4,8 @@ FR-02, FR-03, FR-04: Solves information asymmetry by reconstructing hidden shed 
 """
 
 import math
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 from .constants import MARKET_I0, PRODUCTS, SHOPS
 
 
@@ -13,13 +14,13 @@ class BayesianOpponentTracker:
 
     def __init__(self) -> None:
         self.commodities = [p for p in PRODUCTS if p != "FERTILIZER"]
-        self.hoarded_shed_est: Dict[str, int] = {c: 0 for c in self.commodities}
-        self.prev_opp_tiles: Optional[List[List[Any]]] = None
-        self.prev_market_inv: Optional[Dict[str, int]] = None
-        self.our_sales: Dict[str, int] = {c: 0 for c in self.commodities}
-        self.our_buys: Dict[str, int] = {c: 0 for c in self.commodities}
+        self.hoarded_shed_est: dict[str, int] = {c: 0 for c in self.commodities}
+        self.prev_opp_tiles: list[list[Any]] | None = None
+        self.prev_market_inv: dict[str, int] | None = None
+        self.our_sales: dict[str, int] = {c: 0 for c in self.commodities}
+        self.our_buys: dict[str, int] = {c: 0 for c in self.commodities}
 
-    def record_own_orders(self, orders: List[List[Any]]) -> None:
+    def record_own_orders(self, orders: list[list[Any]]) -> None:
         """Record own emitted orders to isolate opponent market participation."""
         self.our_sales = {c: 0 for c in self.commodities}
         self.our_buys = {c: 0 for c in self.commodities}
@@ -34,10 +35,10 @@ class BayesianOpponentTracker:
 
     def update(
         self,
-        opp_tiles: Optional[List[List[Any]]],
-        market_inv: Dict[str, int],
+        opp_tiles: list[list[Any]] | None,
+        market_inv: dict[str, int],
         step: int,
-        shops: List[str],
+        shops: list[str],
     ) -> None:
         """Update Bayesian belief with new step observation."""
         # 1. Harvest detection from public opponent tile state transitions
@@ -69,9 +70,9 @@ class BayesianOpponentTracker:
         self.prev_opp_tiles = [row[:] for row in opp_tiles] if opp_tiles else None
         self.prev_market_inv = dict(market_inv) if market_inv else None
 
-    def _calc_town_drain(self, step: int, shops: List[str]) -> Dict[str, int]:
+    def _calc_town_drain(self, step: int, shops: list[str]) -> dict[str, int]:
         """Compute theoretical town shop absorption for this turn."""
-        drain: Dict[str, int] = {c: 0 for c in self.commodities}
+        drain: dict[str, int] = {c: 0 for c in self.commodities}
         # Town Center: 1 unit every 24 turns
         if step % 24 == 0:
             for c in self.commodities:

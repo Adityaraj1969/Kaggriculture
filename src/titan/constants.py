@@ -1,10 +1,12 @@
-﻿"""
+"""
 TITAN-1 Engine Constants & Configuration
 Synchronized with official kaggriculture.py engine mechanics.
 """
 
+from typing import Any
+
 # Crop parameters
-CROPS = {
+CROPS: dict[str, dict[str, Any]] = {
     "WHEAT":      {"seed": 10, "first_yield_day": 2, "max_yield_day": 4, "interval": 0, "max_yield": 6, "ongoing": False},
     "CARROT":     {"seed": 20, "first_yield_day": 2, "max_yield_day": 3, "interval": 0, "max_yield": 4, "ongoing": False},
     "TOMATO":     {"seed": 50, "first_yield_day": 8, "max_yield_day": 8, "interval": 1, "max_yield": 4, "ongoing": True},
@@ -13,7 +15,7 @@ CROPS = {
 }
 
 # Livestock parameters
-ANIMALS = {
+ANIMALS: dict[str, dict[str, Any]] = {
     "GOOSE": {"cost": 300, "structure": "COOP",    "first_yield_day": 4, "interval": 1, "max_held": 4, "product": "EGG"},
     "COW":   {"cost": 400, "structure": "PASTURE", "first_yield_day": 8, "interval": 2, "max_held": 6, "product": "MILK"},
     "SHEEP": {"cost": 500, "structure": "PASTURE", "first_yield_day": 6, "interval": 3, "max_held": 6, "product": "WOOL"},
@@ -27,7 +29,7 @@ MARKET_I0 = 10000
 PRICE_FLOOR = 1
 HINGE_GAIN = 8.0
 
-MARKET_PARAMS = {
+MARKET_PARAMS: dict[str, dict[str, Any]] = {
     "WHEAT":      {"base":  25, "I0": MARKET_I0, "T": 400, "below_func": "sqrt",   "below_target": 0.80, "above_func": "log",    "above_target": 0.20},
     "CARROT":     {"base":  35, "I0": MARKET_I0, "T": 450, "below_func": "hinge",  "below_target": 1.00, "above_func": "sqrt",   "above_target": 0.70},
     "TOMATO":     {"base":  60, "I0": MARKET_I0, "T": 200, "below_func": "hinge",  "below_target": 0.40, "above_func": "sqrt",   "above_target": 0.60},

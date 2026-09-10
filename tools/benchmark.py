@@ -7,6 +7,7 @@ import argparse
 import os
 import sys
 import time
+
 from kaggle_environments import make
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
