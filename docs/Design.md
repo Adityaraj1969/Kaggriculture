@@ -66,7 +66,7 @@ The expected value `est_value` translates domain-specific agronomic dynamics int
 | Task Kind | Valuation Formula |
 |---|---|
 | `WATER` (Active Bonus Window) | $\Delta \text{Yield} \times P_{\text{simulated}}(I_{\text{curr}} + \text{Yield})$ |
-| `HARVEST` (Ready Crop / Animal) | $\text{yield\_units} \times P_{\text{simulated}}(I_{\text{curr}} + \text{yield\_units})$ net of market impact |
+| `HARVEST` (Ready Crop / Animal) | $\text{YieldUnits} \times P_{\text{simulated}}(I_{\text{curr}} + \text{YieldUnits})$ net of market impact |
 | `FEED` (Livestock) | Prevents animal loss (Tier 0 when `consecutive_unfed == 1`), preserves banked bonus |
 | `CARE` (Livestock) | Incremental future yield: $+1 \times P_{\text{simulated}}(I_{\text{curr}} + \text{yield})$ |
 | `COLLECT_FERTILIZER` | Sells at $\$100$ or doubles yield bonus progression on high-margin crops |
@@ -78,7 +78,7 @@ The expected value `est_value` translates domain-specific agronomic dynamics int
 | `FERTILIZE` | Saves 2 watering worker-turns & hedges yield cap on high-margin crops |
 
 ### 2.3. Value Density & Two-Tier Gating
-$$\text{Value Density} = \frac{\text{est\_value}}{\max(1, \; \text{est\_turns})}$$
+$$\text{Value Density} = \frac{\text{EstValue}}{\max(1, \; \text{EstTurns})}$$
 
 ```python
 def schedule_tasks(tasks: list[Task]) -> list[Task]:

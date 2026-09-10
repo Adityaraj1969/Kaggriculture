@@ -170,7 +170,7 @@ Let `half = boardSize // 2` ($= 5$). Coordinates $x < \text{half}$ are West, $x 
 - `CARE` action can be performed once per day.
 - At end-of-day, if both `fed_today` and `cared_today` are true, `pending_care_bonus` increments by $+1$.
 - On a scheduled production day:
-  $$\text{Yield} = \begin{cases} 1 + pending\_care\_bonus & \text{if fed on production day} \\ 1 & \text{if unfed (banked bonus forfeited)} \end{cases}$$
+  $$\text{Yield} = \begin{cases} 1 + \text{PendingCareBonus} & \text{if fed on production day} \\ 1 & \text{if unfed (banked bonus forfeited)} \end{cases}$$
 - `pending_care_bonus` resets to $0$ upon yield generation.
 
 ### 5.4. Perpetual Free Fertilizer Stream `[DERIVED]`
@@ -198,7 +198,7 @@ $$\text{amp} = \frac{\text{target} \cdot B}{f(T)}$$
 
 $$\text{sign} = \begin{cases} +1 & \text{if } inv < I_0 \quad (\text{Scarcity: Price Rises}) \\ -1 & \text{if } inv > I_0 \quad (\text{Glut: Price Crashes}) \end{cases}$$
 
-$$f \in \left\{ \text{linear}(x)=x, \; \text{sq}(x)=x^2, \; \text{sqrt}(x)=\sqrt{x}, \; \text{log}(x)=\ln(1+x), \; \text{log10}(x)=\log_{10}(1+x), \; \text{hinge}(x) \right\}$$
+$$f \in \left\lbrace \text{linear}(x)=x, \; \text{sq}(x)=x^2, \; \text{sqrt}(x)=\sqrt{x}, \; \text{log}(x)=\ln(1+x), \; \text{log10}(x)=\log_{10}(1+x), \; \text{hinge}(x) \right\rbrace$$
 
 $$\text{hinge}(x) = u + 8 \cdot \max(0, \; u - 1)^2 \quad \text{where } u = \frac{x}{T}$$
 

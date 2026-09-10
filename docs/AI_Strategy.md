@@ -155,7 +155,7 @@ $$P(\text{Dump}_{c, t}) = 1 - \exp\left( -\frac{\hat{S}_{\text{opp}}(c, t)}{12.0
 Selling $n$ units in a single turn yields revenue $R(n) = \sum_{k=1}^n P(I_{\text{curr}} + k)$.
 To prevent triggering our own price crashes on quadratic curves:
 
-$$n^* = \max \left\{ n \le \text{ShedInv}[c] \;\Big|\; P(I_{\text{curr}} + n) \ge \alpha \cdot \text{BasePrice} \right\} \quad (\alpha = 0.65)$$
+$$n^* = \max \left\lbrace n \le \text{ShedInv}[c] \;\Big|\; P(I_{\text{curr}} + n) \ge \alpha \cdot \text{BasePrice} \right\rbrace \quad (\alpha = 0.65)$$
 
 Any surplus inventory above $n^*$ is spread across continuous turns via the **Leaky-Bucket Engine**, ensuring shed capacity remains below 60 units while capturing peak prices.
 

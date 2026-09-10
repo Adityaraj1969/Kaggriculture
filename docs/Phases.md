@@ -86,7 +86,7 @@ Expansion decisions evaluate the discounted stream of tile returns over remainin
 
 $$\text{NPV}_k = \sum_{\tau = t}^{30} \left( 25 \times \bar{R}_{\text{tile}}(\tau) - \text{LaborCost}_{\text{tile}}(\tau) \right)$$
 
-$$\text{Execute BUY\_LAND}_k \iff \text{Bank} \ge \text{Cost}_k + \text{SafetyBuffer} \quad \text{AND} \quad \text{NPV}_k > 1.25 \times \text{Cost}_k$$
+$$\text{Execute BUY LAND}_k \iff \text{Bank} \ge \text{Cost}_k + \text{SafetyBuffer} \quad \text{AND} \quad \text{NPV}_k > 1.25 \times \text{Cost}_k$$
 
 - **Quadrant 2 (NE):** $\$1,000$ (Optimal Unlock Window: Days 4–6). High ROI; heavily cultivated.
 - **Quadrant 3 (SW):** $\$2,000$ (Optimal Unlock Window: Days 9–12). Unlocked only if capital velocity $> \$1,000/\text{day}$.
