@@ -129,18 +129,18 @@ Kaggriculture/
 ├── .github/workflows/          # Continuous Integration (CI)
 │   └── ci.yml                  # Automated linting, type checks, tests, and simulation verification
 │
-└── [Documentation Suite]       # 11 authoritative specification modules
-    ├── PRD.md                  # Requirements, failure modes & SLA definitions
-    ├── Rules.md                # Mathematical ground truth, engine formulas & tables
-    ├── Architecture.md         # 5-tier modular system architecture & latency budgets
-    ├── Design.md               # Algorithmic design, task scheduler & mesh routing
-    ├── AI_Strategy.md          # Relative objective theorem & game-theoretic playbooks
-    ├── Phases.md               # 4-phase execution lifecycle roadmap & milestones
-    ├── Evaluation.md           # Adversarial league & Bradley-Terry rating model
-    ├── code_quality.md         # Systems engineering, typing & safety standards
-    ├── Validation.md           # Deployment gates & open-question empirical fixtures
-    ├── Demo.md                 # Tournament demonstration runbook & benchmark tape
-    └── UI_UX_designed.md       # Terminal telemetry design & visualizer specification
+├── docs/                       # Complete 11-module technical specification suite
+│   ├── PRD.md                  # Requirements, failure modes & SLA definitions
+│   ├── Rules.md                # Mathematical ground truth, engine formulas & tables
+│   ├── Architecture.md         # 5-tier modular system architecture & latency budgets
+│   ├── Design.md               # Algorithmic design, task scheduler & mesh routing
+│   ├── AI_Strategy.md          # Relative objective theorem & game-theoretic playbooks
+│   ├── Phases.md               # 4-phase execution lifecycle roadmap & milestones
+│   ├── Evaluation.md           # Adversarial league & Bradley-Terry rating model
+│   ├── code_quality.md         # Systems engineering, typing & safety standards
+│   ├── Validation.md           # Deployment gates & open-question empirical fixtures
+│   ├── Demo.md                 # Tournament demonstration runbook & benchmark tape
+│   └── UI_UX_designed.md       # Terminal telemetry design & visualizer specification
 ```
 
 ---
@@ -214,18 +214,18 @@ kaggle competitions submit -c kaggriculture -f main.py -m "TITAN-1 v2.0 Release"
 
 ## Core Economic Invariants
 
-### 1. The Relative Objective Theorem (`AI_Strategy.md §1`)
+### 1. The Relative Objective Theorem (`docs/AI_Strategy.md §1`)
 Kaggle leaderboards update strictly on match outcomes (Win/Loss/Tie). Winning by \$1 produces identical rating delta to winning by \$25,000:
 $$\max_{\pi} \; P\left(\text{Bank}_{\text{us}}(719) > \text{Bank}_{\text{opp}}(719)\right) \quad \not\equiv \quad \max_{\pi} \; \mathbb{E}[\text{Bank}_{\text{us}}(719)]$$
 - **Leading ($\Delta \text{Bank} > +\$3,000$):** Variance is a liability. Decouple from speculative volatility, favor fast-turnover staples (Wheat, Carrot), enforce aggressive continuous selling, and lock in liquid cash.
 - **Trailing ($\Delta \text{Bank} < -\$3,000$):** Variance is an asset. Seek high-margin plays (Melon, Strawberry, livestock compounding) to force a reversal.
 
-### 2. Mass-Balance Opponent Deduction (`AI_Strategy.md §5`)
+### 2. Mass-Balance Opponent Deduction (`docs/AI_Strategy.md §5`)
 Opponent shed holdings are private, but public market inventory $I(t)$ and town consumption $D_{\text{town}}(t)$ are deterministic. TITAN-1 computes hidden opponent transactions:
 $$\Delta S_{\text{opp}}(c, t) = \max\left(0, \; \Delta I(c, t) + D_{\text{town}}(c, t) - \Delta S_{\text{us}}(c, t) + \Delta B_{\text{us}}(c, t)\right)$$
 If mature crops disappear from opponent fields without corresponding market volume, the tracker recognizes stockpiling and initiates pre-emptive selling before the impending price crash.
 
-### 3. Asymmetric Fragility & Terminal Liquidation (`Rules.md §6`)
+### 3. Asymmetric Fragility & Terminal Liquidation (`docs/Rules.md §6`)
 Uncontrolled dumping on goods with quadratic collapse (`MELON`, `WOOL`) crashes prices to $\$1.00$. TITAN-1 bounds sales to calculated volume headroom during mid-game:
 $$\text{headroom} = \max\left(1, \min\left(15, \lfloor T \times 0.35 - (I_{\text{curr}} - 10000) \rfloor\right)\right)$$
 On Day 30 (turns 696–719), the terminal liquidation engine bypasses elasticity limits, draining 100% of shed inventory across all 10 order lines to maximize liquid gold.
