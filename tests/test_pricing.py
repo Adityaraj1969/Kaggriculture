@@ -1,4 +1,4 @@
-﻿import os
+import os
 import sys
 import unittest
 
@@ -61,7 +61,7 @@ class TestMarketPricing(unittest.TestCase):
         """Simulate multi-unit sequential sell revenue."""
         rev = compute_sell_revenue("WHEAT", 5, MARKET_I0)
         self.assertGreater(rev, 0)
-        # Average price should be around base price ()
+        # Average price should be around base price (25 gold per unit)
         self.assertTrue(90 <= rev <= 130)
 
 

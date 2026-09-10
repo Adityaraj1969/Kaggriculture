@@ -53,13 +53,7 @@ LAST_PLANT_DAY = {
     "STRAWBERRY": 19,
 }
 
-# Land quadrant geometry and unlock costs
-QUADRANT_BOUNDS = {
-    0: (0, 4, 0, 4),   # NW (Starts unlocked)
-    1: (5, 9, 0, 4),   # NE (,000)
-    2: (0, 4, 5, 9),   # SW (,000)
-    3: (5, 9, 5, 9),   # SE (,000)
-}
+# Land quadrant unlock costs (sequential: NE -> SW -> SE)
 QUADRANT_COSTS = {1: 1000, 2: 2000, 3: 4000}
 
 # Central shed access tiles (traversable regardless of quadrant unlock status)

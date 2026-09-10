@@ -37,7 +37,6 @@ def compute_mhi(market_inv: dict[str, int]) -> tuple[float, float]:
 
 def get_plant_order(
     posture: str,
-    day: int,
     days_left: int,
     shed: dict[str, int],
 ) -> list[str]:

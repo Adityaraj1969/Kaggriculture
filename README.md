@@ -1,237 +1,264 @@
-```
-  _______ _____ _______       _   _        __     _____ ____  __  __ ____ ___ _   _ _____ 
- |__   __|_   _|__   __|/\   | \ | |      /_ |   / ____/ __ \|  \/  |  _ \_ _| \ | | ____|
-    | |    | |    | |  /  \  |  \| |______ | |  | |   | |  | | \  / | |_) | ||  \| | |__  
-    | |    | |    | | / /\ \ | . ` |______|| |  | |   | |  | | |\/| |  _ <| || . ` |  __| 
-    | |   _| |_   | |/ ____ \| |\  |       | |  | |___| |__| | |  | | |_) | || |\  | |___ 
-    |_|  |_____|  |_/_/    \_\_| \_|       |_|   \_____\____/|_|  |_|____/___|_| \_|_____|
-```
+<div align="center">
 
-```
-══════════════════════════════════════════════════════════════════════════════════════════════════════
-  TITAN-1 / COMBINE · KAGGRICULTURE (Kaggle × Google LLC)
-  Master Agro-Economic Engineering Documentation Suite & Autonomous Tournament Kernel
-──────────────────────────────────────────────────────────────────────────────────────────────────────
-  SPONSOR     Google LLC                             PLATFORM    Kaggle Competitions
-  PRIZE POOL  $50,000 Total ($5,000 Tier #1 Award)   TARGET      Championship Rank #1
-  STATUS      PRODUCTION RELEASE v2.0                BENCHMARK   10/10 Wins (Avg: $29,049.10)
-  WORKSPACE   ./ (Repository Root)                   RUNTIME     Python 3.10+ (Sub-10ms/turn)
-══════════════════════════════════════════════════════════════════════════════════════════════════════
-```
+# 🌾 TITAN-1 — Kaggriculture Championship Agent
 
-[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
-[![Kaggle Environments](https://img.shields.io/badge/kaggle--environments-1.14%2B-20BEFF.svg)](https://github.com/Kaggle/kaggle-environments)
-[![Simulation Status](https://img.shields.io/badge/tournament%20win%20rate-100%25-brightgreen.svg)]()
-[![Mean Reward](https://img.shields.io/badge/mean%20reward-%2429%2C049-success.svg)]()
-[![Action Validity](https://img.shields.io/badge/invalids-0.000%25-brightgreen.svg)]()
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+**Autonomous agro-economic simulation engine for the Kaggle × Google LLC Kaggriculture tournament**
+
+[![CI](https://github.com/Adityaraj1969/Kaggriculture/actions/workflows/ci.yml/badge.svg)](https://github.com/Adityaraj1969/Kaggriculture/actions/workflows/ci.yml)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-3776AB?logo=python&logoColor=white)](https://www.python.org)
+[![Kaggle Environments](https://img.shields.io/badge/kaggle--environments-1.14+-20BEFF?logo=kaggle&logoColor=white)](https://github.com/Kaggle/kaggle-environments)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Win Rate](https://img.shields.io/badge/win%20rate-100%25-brightgreen)](#benchmark-results)
+[![Avg Reward](https://img.shields.io/badge/avg%20reward-%2429%2C049-blue)](#benchmark-results)
+
+<br>
+
+<img src="docs/kaggriculture_simulation_screen.jpg" alt="Kaggriculture simulation" width="720">
+
+</div>
 
 ---
 
-## Executive Overview
+## Overview
 
-**Kaggriculture** is an official competitive simulation benchmark hosted by **Kaggle** and sponsored by **Google LLC**. Two autonomous agents manage competing 10×10 agricultural estates across a 720-turn (30-day) season (turns $0$ through $719$). Agents cultivate crops, care for livestock, hire farm hands, unlock land quadrants, and transact through a **single, shared, highly reactive marketplace** governed by non-linear price elasticity curves.
+[Kaggriculture](https://www.kaggle.com/competitions/kaggriculture) is a competitive simulation hosted by **Kaggle** and sponsored by **Google LLC** (\$50,000 prize pool). Two autonomous agents manage rival 10×10 agricultural estates across 720 turns (30 in-game days), competing for the highest liquid bank balance.
 
-At Turn 719, the player with the highest liquid bank balance wins the match. However, **Kaggle rating updates depend strictly on binary win/loss/tie outcomes—margin of victory provides zero additional rating**. 
+**TITAN-1** treats Kaggriculture not as a simple farming game, but as a **market microstructure and capital velocity problem** — combining Bayesian opponent tracking, non-linear price simulation, adaptive strategic postures, and real-time spatial logistics into a single sub-10ms decision loop.
 
-**TITAN-1 / COMBINE** is a championship-grade autonomous simulation engine built on mathematical microeconomics, low-allocation computing, Bayesian opponent reconstruction, and two-tier task scheduling. Rather than treating Kaggriculture as a naive farming game, TITAN-1 solves it as a **high-frequency market microstructure, dynamic inventory management, and capital velocity problem**.
+### Key Results
 
----
-
-## Tournament Benchmark Results (Live Engine Verified)
-
-> **Empirical Standard:** All benchmark data reported below is derived from complete, 720-step head-to-head tournament matches run directly on the official Kaggle `kaggle_environments` competition engine against the platform `starter` baseline agent across 10 canonical seeds.
-
-```
-╔═══════════════════════════════════════════════════════════════════════════════════════════════════╗
-│          TITAN-1 vs STARTER BASELINE : 10-SEED TOURNAMENT BENCHMARK (720 TURNS)                  │
-╠══════════╦═════════════════════╦═════════════════════╦═════════════════════╦══════════════╦═══════╣
-║ SEED     ║ TITAN-1 CAPITAL     ║ STARTER CAPITAL     ║ WINNING DELTA       ║ RELATIVE ADV ║ RESULT║
-╠══════════╬═════════════════════╬═════════════════════╬═════════════════════╬══════════════╬═══════╣
-║ Seed 1   ║ $28,577.00 Gold     ║ $3,501.00 Gold      ║ +$25,076.00 Gold    ║ +716.3% Lead ║ WIN   ║
-║ Seed 2   ║ $29,671.00 Gold     ║ $3,684.00 Gold      ║ +$25,987.00 Gold    ║ +705.4% Lead ║ WIN   ║
-║ Seed 3   ║ $27,662.00 Gold     ║ $3,936.00 Gold      ║ +$23,726.00 Gold    ║ +602.8% Lead ║ WIN   ║
-║ Seed 4   ║ $28,704.00 Gold     ║ $3,532.00 Gold      ║ +$25,172.00 Gold    ║ +712.7% Lead ║ WIN   ║
-║ Seed 5   ║ $28,553.00 Gold     ║ $3,645.00 Gold      ║ +$24,908.00 Gold    ║ +683.3% Lead ║ WIN   ║
-║ Seed 42  ║ $30,117.00 Gold     ║ $3,464.00 Gold      ║ +$26,653.00 Gold    ║ +769.4% Lead ║ WIN   ║
-║ Seed 100 ║ $28,382.00 Gold     ║ $3,592.00 Gold      ║ +$24,790.00 Gold    ║ +690.1% Lead ║ WIN   ║
-║ Seed 256 ║ $29,369.00 Gold     ║ $3,516.00 Gold      ║ +$25,853.00 Gold    ║ +735.3% Lead ║ WIN   ║
-║ Seed 777 ║ $29,807.00 Gold     ║ $3,637.00 Gold      ║ +$26,170.00 Gold    ║ +719.5% Lead ║ WIN   ║
-║ Seed 999 ║ $29,649.00 Gold     ║ $3,536.00 Gold      ║ +$26,113.00 Gold    ║ +738.5% Lead ║ WIN   ║
-╠══════════╬═════════════════════╬═════════════════════╬═════════════════════╬══════════════╬═══════╣
-║ AVERAGE  ║ $29,049.10 GOLD     ║ $3,604.30 GOLD      ║ +$25,444.80 GOLD    ║ +705.9% LEAD ║ 100%  ║
-╚══════════╩═════════════════════╩═════════════════════╩═════════════════════╩══════════════╩═══════╝
-```
-
-- **Win Rate:** **10/10 (100.0%)**
-- **Average Final Capital:** **$29,049.10 Gold** (+705.9% over starter average of $3,604.30)
-- **PRD SLA Target:** $22,000.00 Gold (**Exceeded by +32.0%**)
-- **Mean Per-Turn Latency:** **< 5.2 ms** (Safety limit: 45.0 ms, Sandbox ceiling: 1000.0 ms)
+| Metric | Value |
+|---|---|
+| Tournament Win Rate | **10/10 (100%)** vs Kaggle `starter` baseline |
+| Mean Final Capital | **\$29,049** (vs \$3,604 opponent avg) |
+| Relative Advantage | **+706%** over baseline |
+| Per-Turn Latency | **< 5.2 ms** (limit: 1,000 ms) |
 
 ---
 
-## System Architecture
+## Architecture
 
-TITAN-1 operates as a deterministic, single-threaded, 5-tier pipeline processing raw observation dictionaries within an internal cooperative budget of 45.0 ms:
+TITAN-1 runs as a deterministic, single-threaded, 5-tier pipeline that processes each turn observation within a 40ms safety budget:
 
 ```mermaid
-graph TD
-    Obs[Kaggle Turn Observation] --> T1[Tier 1: Perception & Bayesian Tracking]
-    T1 --> |Spatial Tensors & Dump Hazards| T2[Tier 2: Macroeconomic Posture & Portfolio]
-    T2 --> |Target Allocations & Posture Mode| T3[Tier 3: Spatial Logistics & Port Arbiter]
-    T3 --> |Worker Movements & Field Operations| T4[Tier 4: Leaky-Bucket Market Liquidation]
-    T4 --> |Order Tape <= 10 lines| T5[Tier 5: Safety Watchdog & Schema Sanitizer]
-    T5 --> Output[Verified Kaggle Action Payload]
+graph LR
+    A[Turn Observation] --> B[Perception &<br>Bayesian Tracking]
+    B --> C[Strategic Posture<br>Engine]
+    C --> D[Market Order<br>Tape]
+    D --> E[Worker Spatial<br>Dispatch]
+    E --> F[Safety Watchdog<br>& Output]
 ```
 
-### The 5 Architectural Tiers:
-1. **Tier 1: Perception & Bayesian Microstructure Belief** — Parses terrain grid and reconstructs opponent private shed inventory by reconciling public market deltas, observed mature plant transitions, and town consumption drains. Computes real-time dump hazard probabilities $P_{\text{dump}}$.
-2. **Tier 2: Macroeconomic Portfolio & Posture Engine** — Evaluates bank margin ($\Delta \text{Bank} = \text{Bank}_{\text{us}} - \text{Bank}_{\text{opp}}$) and season clock to set one of 5 strategic postures (`BALANCED`, `LEADING`, `TRAILING`, `ENDGAME`, `AUTARKY`). Gated by Net Present Value (NPV) land expansion calculus.
-3. **Tier 3: Multi-Agent Spatial Logistics & Port Arbiter** — Routes workers over the global walkable mesh $\mathcal{M}_{\text{walkable}} = \mathcal{T}_{\text{unlocked}} \cup \{(4,4), (5,4), (4,5), (5,5)\}$ with dedicated quadrant shed port locks, eliminating central congestion deadlocks.
-4. **Tier 4: Continuous Leaky-Bucket Liquidation Engine** — Emits up to 10 market order lines per turn, strictly bounding intraday sales for fragile goods (`MELON`, `STRAWBERRY`, `MILK`, `WOOL`) to preserve prices $>65\%$ of base, switching to unconstrained 100% liquidation during turns 696–719.
-5. **Tier 5: Real-Time Safety Watchdog & Invariant Engine** — Verifies schema legality, coordinate boundaries, unit action limits, and seed collision guards, backed by a sub-40ms monotonic circuit breaker and guaranteed legal fallback action.
+| Tier | Component | Responsibility |
+|---:|---|---|
+| 1 | **Perception & Bayesian Tracking** | Parse terrain grid, reconstruct opponent shed inventory via market delta reconciliation |
+| 2 | **Strategic Posture Engine** | Set posture (BALANCED / LEADING / TRAILING / ENDGAME / AUTARKY) based on bank gap and market health |
+| 3 | **Market Order Tape** | Emit up to 10 orders per turn — selling, land expansion, hiring, livestock, seeds |
+| 4 | **Worker Spatial Dispatch** | Route farmer + hired hands over the walkable mesh using priority-based task targeting |
+| 5 | **Safety Watchdog** | Schema validation, coordinate bounds, 40ms circuit breaker, guaranteed legal fallback |
+
+### Strategic Postures
+
+```
+  Bank Gap > +$3,000  →  LEADING    (conservative: lock in margin, fast-turnover staples)
+  Bank Gap < -$3,000  →  TRAILING   (aggressive: high-margin crops, livestock compounding)
+  Market collapsed    →  AUTARKY    (defensive: wheat-only, decouple from crashed market)
+  Day >= 29           →  ENDGAME    (liquidation: dump all shed inventory for cash)
+  Otherwise           →  BALANCED   (adaptive: diversified portfolio, moderate selling)
+```
 
 ---
 
-## Repository Layout
+## Repository Structure
 
 ```
 Kaggriculture/
-├── main.py                     # Self-contained tournament submission file (<35 KiB)
-├── pyproject.toml              # Build, ruff, mypy, and pytest configuration
-├── requirements.txt            # Production runtime dependencies
-├── requirements-dev.txt        # Developer test, linting, and profiling tools
-├── Makefile                    # Developer shortcuts (test, benchmark, package, lint)
-├── LICENSE                     # MIT Open-Source License
+├── main.py                       # Self-contained competition submission (~35 KB)
+├── pyproject.toml                # Build config, ruff, mypy, pytest settings
+├── requirements.txt              # Runtime dependencies
+├── requirements-dev.txt          # Dev/test dependencies
+├── Makefile                      # Shortcuts: test, benchmark, lint, package
+├── LICENSE                       # MIT License
 │
-├── src/                        # Clean, modularized Python architecture
-│   └── titan/
-│       ├── __init__.py         # Package entry point
-│       ├── constants.py        # Canonical crops, animals, prices, town shops
-│       ├── pricing.py          # Exact non-linear price simulation & shape functions
-│       ├── tracker.py          # Bayesian opponent mass-balance tracker
-│       ├── navigation.py       # Global mesh pathfinding & Manhattan targeting
-│       ├── strategy.py         # MHI calculus, posture engine, gestation cutoffs
-│       └── agent.py            # Complete runtime agent implementation
+├── src/titan/                    # Modular development-time package
+│   ├── __init__.py               # Package exports
+│   ├── constants.py              # Crops, animals, market params, town shops
+│   ├── pricing.py                # Non-linear price curves & shape functions
+│   ├── tracker.py                # Bayesian opponent mass-balance tracker
+│   ├── navigation.py             # Manhattan pathfinding & priority targeting
+│   ├── strategy.py               # MHI calculation & posture engine
+│   └── agent.py                  # Full agent implementation
 │
-├── tests/                      # Automated test & invariant suite
-│   ├── test_pricing.py         # 27-point boundary price verification across 9 commodities
-│   ├── test_tracker.py         # Bayesian mass-balance & shop drain unit tests
-│   ├── test_navigation.py      # Quadrant mapping, step navigation & mesh verification
-│   ├── test_invariants.py      # Schema structure, order batch caps, fault isolation
-│   └── test_simulation.py      # 720-turn end-to-end simulation integration test
+├── tests/                        # Automated test suite (15 tests)
+│   ├── test_pricing.py           # 27-point boundary price verification
+│   ├── test_tracker.py           # Bayesian tracking & shop drain tests
+│   ├── test_navigation.py        # Quadrant mapping & pathfinding tests
+│   ├── test_invariants.py        # Schema, batch caps, fault isolation
+│   └── test_simulation.py        # 720-turn end-to-end integration test
 │
-├── tools/                      # Engineering CLI utilities
-│   ├── benchmark.py            # Multi-seed tournament benchmark harness with profiling
-│   ├── evaluate_league.py      # Adversarial league evaluator (starter, random)
-│   └── package_submission.py   # Pre-flight validator & submission.tar.gz packager
+├── tools/                        # CLI utilities
+│   ├── benchmark.py              # Multi-seed tournament benchmark
+│   ├── evaluate_league.py        # Adversarial league evaluation
+│   ├── render_replay.py          # Match visualizer & HTML replay export
+│   └── package_submission.py     # Pre-flight validator & archive builder
 │
-├── .github/workflows/          # Continuous Integration (CI)
-│   └── ci.yml                  # Automated linting, type checks, tests, and simulation verification
+├── docs/                         # Technical specification suite
+│   ├── PRD.md                    # Product requirements & SLA definitions
+│   ├── Rules.md                  # Engine formulas & game mechanics
+│   ├── Architecture.md           # 5-tier system architecture
+│   ├── Design.md                 # Algorithmic design & task scheduling
+│   ├── AI_Strategy.md            # Game theory & opponent modeling
+│   ├── Phases.md                 # Development lifecycle roadmap
+│   ├── Evaluation.md             # League evaluation methodology
+│   ├── Validation.md             # Deployment gates & test fixtures
+│   ├── code_quality.md           # Engineering standards
+│   ├── Demo.md                   # Demonstration runbook
+│   └── UI_UX_designed.md         # Terminal telemetry design
 │
-├── docs/                       # Complete 11-module technical specification suite
-│   ├── PRD.md                  # Requirements, failure modes & SLA definitions
-│   ├── Rules.md                # Mathematical ground truth, engine formulas & tables
-│   ├── Architecture.md         # 5-tier modular system architecture & latency budgets
-│   ├── Design.md               # Algorithmic design, task scheduler & mesh routing
-│   ├── AI_Strategy.md          # Relative objective theorem & game-theoretic playbooks
-│   ├── Phases.md               # 4-phase execution lifecycle roadmap & milestones
-│   ├── Evaluation.md           # Adversarial league & Bradley-Terry rating model
-│   ├── code_quality.md         # Systems engineering, typing & safety standards
-│   ├── Validation.md           # Deployment gates & open-question empirical fixtures
-│   ├── Demo.md                 # Tournament demonstration runbook & benchmark tape
-│   └── UI_UX_designed.md       # Terminal telemetry design & visualizer specification
+└── .github/workflows/ci.yml     # CI: lint, type check, test, benchmark
 ```
+
+> **Note:** `main.py` is a fully self-contained copy of the agent for Kaggle submission. `src/titan/` is the equivalent modular package used for development and testing.
 
 ---
 
-## Quickstart Guide
+## Getting Started
 
-### 1. Installation & Environment Setup
+### Prerequisites
+
+- Python 3.10 or later
+- pip
+
+### Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/your-username/Kaggriculture.git
+git clone https://github.com/Adityaraj1969/Kaggriculture.git
 cd Kaggriculture
 
-# Create virtual environment & install dependencies
+# Create a virtual environment (recommended)
 python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+.venv\Scripts\activate        # Windows
+# source .venv/bin/activate   # macOS/Linux
+
 pip install -r requirements-dev.txt
 ```
 
-### 2. Run Head-to-Head Simulation
+### Run a Match
 
 ```bash
-# Run a single 720-turn match against the Kaggle starter bot
+# Single match against the Kaggle starter bot
 python -c "
 from kaggle_environments import make
 env = make('kaggriculture', configuration={'episodeSteps': 720, 'seed': 42}, debug=True)
 env.run(['main.py', 'starter'])
 final = env.steps[-1]
-print(f'TITAN-1: \${final[0].reward:,.2f} | Starter: \${final[1].reward:,.2f}')
+print(f'TITAN-1: {final[0].reward:,.0f}  |  Starter: {final[1].reward:,.0f}')
 "
 ```
 
-### 3. Run Multi-Seed Tournament Benchmark
+### Run the Benchmark
 
 ```bash
-# Benchmark across default seeds with latency profiling and gate verification
+# 10-seed tournament with deployment gate checks
 python tools/benchmark.py --seeds 1,2,3,4,5,42,100,256,777,999
 
-# Or using the Makefile
+# Or via Makefile
 make benchmark
 ```
 
-### 4. Run Adversarial League Evaluation
+### Watch a Replay
 
 ```bash
-# Evaluate candidate against multiple opponent archetypes
-python tools/evaluate_league.py --seeds 1,2,3,4,5
+# Generate an interactive HTML replay and open it in the browser
+python tools/render_replay.py --seed 42
+
+# Self-play (both sides use TITAN-1)
+python tools/render_replay.py --agent main.py --opponent main.py --output replays/self_play.html
 ```
 
-### 5. Execute Automated Test Suite
+### Run Tests
 
 ```bash
-# Run complete unit and invariant test suite
-python -m unittest discover -s tests -p "test_*.py"
+python -m unittest discover -s tests -p "test_*.py" -v
 
-# Or using the Makefile
+# Or via Makefile
 make test
 ```
 
-### 6. Package and Submit to Kaggle
+### Submit to Kaggle
 
 ```bash
-# Run 4-point pre-flight validation and package submission.tar.gz
+# Validate and package
 python tools/package_submission.py
 
-# Submit single-file build directly via Kaggle CLI
-kaggle competitions submit -c kaggriculture -f main.py -m "TITAN-1 v2.0 Release"
+# Upload
+kaggle competitions submit -c kaggriculture -f main.py -m "v2.0"
 ```
 
 ---
 
-## Core Economic Invariants
+## Benchmark Results
 
-### 1. The Relative Objective Theorem (`docs/AI_Strategy.md §1`)
-Kaggle leaderboards update strictly on match outcomes (Win/Loss/Tie). Winning by \$1 produces identical rating delta to winning by \$25,000:
-$$\max_{\pi} \; P\left(\text{Bank}_{\text{us}}(719) > \text{Bank}_{\text{opp}}(719)\right) \quad \not\equiv \quad \max_{\pi} \; \mathbb{E}[\text{Bank}_{\text{us}}(719)]$$
-- **Leading ($\Delta \text{Bank} > +\$3,000$):** Variance is a liability. Decouple from speculative volatility, favor fast-turnover staples (Wheat, Carrot), enforce aggressive continuous selling, and lock in liquid cash.
-- **Trailing ($\Delta \text{Bank} < -\$3,000$):** Variance is an asset. Seek high-margin plays (Melon, Strawberry, livestock compounding) to force a reversal.
+All results from complete 720-turn matches on the official `kaggle_environments` engine against the platform `starter` baseline:
 
-### 2. Mass-Balance Opponent Deduction (`docs/AI_Strategy.md §5`)
-Opponent shed holdings are private, but public market inventory $I(t)$ and town consumption $D_{\text{town}}(t)$ are deterministic. TITAN-1 computes hidden opponent transactions:
-$$\Delta S_{\text{opp}}(c, t) = \max\left(0, \; \Delta I(c, t) + D_{\text{town}}(c, t) - \Delta S_{\text{us}}(c, t) + \Delta B_{\text{us}}(c, t)\right)$$
-If mature crops disappear from opponent fields without corresponding market volume, the tracker recognizes stockpiling and initiates pre-emptive selling before the impending price crash.
+| Seed | TITAN-1 | Starter | Margin | Result |
+|---:|---:|---:|---:|:---:|
+| 1 | \$28,577 | \$3,501 | +\$25,076 | ✅ WIN |
+| 2 | \$29,671 | \$3,684 | +\$25,987 | ✅ WIN |
+| 3 | \$27,662 | \$3,936 | +\$23,726 | ✅ WIN |
+| 4 | \$28,704 | \$3,532 | +\$25,172 | ✅ WIN |
+| 5 | \$28,553 | \$3,645 | +\$24,908 | ✅ WIN |
+| 42 | \$30,117 | \$3,464 | +\$26,653 | ✅ WIN |
+| 100 | \$28,382 | \$3,592 | +\$24,790 | ✅ WIN |
+| 256 | \$29,369 | \$3,516 | +\$25,853 | ✅ WIN |
+| 777 | \$29,807 | \$3,637 | +\$26,170 | ✅ WIN |
+| 999 | \$29,649 | \$3,536 | +\$26,113 | ✅ WIN |
+| **Avg** | **\$29,049** | **\$3,604** | **+\$25,445** | **100%** |
 
-### 3. Asymmetric Fragility & Terminal Liquidation (`docs/Rules.md §6`)
-Uncontrolled dumping on goods with quadratic collapse (`MELON`, `WOOL`) crashes prices to $\$1.00$. TITAN-1 bounds sales to calculated volume headroom during mid-game:
-$$\text{headroom} = \max\left(1, \min\left(15, \lfloor T \times 0.35 - (I_{\text{curr}} - 10000) \rfloor\right)\right)$$
-On Day 30 (turns 696–719), the terminal liquidation engine bypasses elasticity limits, draining 100% of shed inventory across all 10 order lines to maximize liquid gold.
+---
+
+## How It Works
+
+### Market Price Simulation
+
+TITAN-1 replicates the engine's exact non-linear price curves to predict revenue before selling. Each commodity has a base price, an equilibrium inventory level, and asymmetric elasticity functions (sqrt, log, hinge, quadratic) that govern price response to supply gluts and scarcity.
+
+### Bayesian Opponent Tracking
+
+Opponent shed contents are private, but market inventory changes and town shop consumption are public. By reconciling these observable signals against our own trades, TITAN-1 estimates what the opponent is hoarding and computes a **dump hazard probability** — triggering pre-emptive selling before an anticipated price crash.
+
+### Leaky-Bucket Liquidation
+
+For fragile commodities (Melon, Wool, Strawberry, Milk) where prices collapse quadratically under oversupply, TITAN-1 caps per-turn sales to calculated headroom thresholds. On the final day (turns 696–719), the terminal liquidation engine bypasses all limits and dumps 100% of shed inventory.
+
+---
+
+## CI Pipeline
+
+Every push to `main` triggers:
+
+1. **Ruff** — lint checking (pycodestyle, pyflakes, isort, bugbear, pyupgrade)
+2. **Mypy** — static type analysis
+3. **Unit Tests** — 15 tests covering pricing, navigation, tracking, invariants
+4. **Simulation Benchmark** — 3-seed quick verification with 100% win rate gate
+
+---
+
+## Documentation
+
+Detailed technical specifications are in the [`docs/`](docs/) directory:
+
+| Document | Contents |
+|---|---|
+| [PRD.md](docs/PRD.md) | Requirements, failure modes, SLA definitions |
+| [Rules.md](docs/Rules.md) | Engine formulas, crop/animal/market tables |
+| [Architecture.md](docs/Architecture.md) | 5-tier pipeline design & latency budgets |
+| [Design.md](docs/Design.md) | Algorithm details & task scheduling |
+| [AI_Strategy.md](docs/AI_Strategy.md) | Game theory & opponent modeling |
+| [Validation.md](docs/Validation.md) | Deployment gates & test methodology |
 
 ---
 
 ## License
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License — see [LICENSE](LICENSE) for details.

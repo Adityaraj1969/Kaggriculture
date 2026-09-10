@@ -1,4 +1,4 @@
-﻿"""
+"""
 TITAN-1 Production Packaging & Pre-Flight Verification Tool
 Validates Kaggle submission constraints and generates certified archives.
 """
@@ -57,10 +57,10 @@ def verify_submission():
     tar_path = os.path.join(DIST_DIR, "submission.tar.gz")
 
     with tarfile.open(tar_path, "w:gz") as tar:
+        # Only main.py is needed — it's fully self-contained for Kaggle submission.
+        # The src/titan/ package is the development-time modular equivalent but
+        # is NOT imported by main.py at runtime.
         tar.add(MAIN_PY, arcname="main.py")
-        src_dir = os.path.join(ROOT, "src")
-        if os.path.exists(src_dir):
-            tar.add(src_dir, arcname="src")
 
     tar_size_kb = os.path.getsize(tar_path) / 1024.0
     print(f"OK -> {tar_path} ({tar_size_kb:.2f} KiB)")

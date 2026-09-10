@@ -1,4 +1,4 @@
-﻿"""
+"""
 TITAN-1: Autonomous Championship Agro-Economic Simulation Kernel
 Kaggle Simulations // Google LLC Kaggriculture Tournament Pool
 """
@@ -40,4 +40,3 @@ __all__ = [
     "SHED_ACCESS_TILES",
     "SHOPS",
 ]
-

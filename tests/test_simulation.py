@@ -1,4 +1,4 @@
-﻿import os
+import os
 import sys
 import unittest
 
@@ -19,8 +19,8 @@ class TestSimulationIntegration(unittest.TestCase):
         p1_reward = final_step[1].reward
 
         self.assertEqual(final_step[0].status, "DONE")
-        self.assertGreater(p0_reward, p1_reward, "P0 () must beat starter P1 ()")
-        self.assertGreaterEqual(p0_reward, 22000.0, "P0 reward () must meet the  SLA")
+        self.assertGreater(p0_reward, p1_reward, "TITAN-1 (P0) must beat starter (P1)")
+        self.assertGreaterEqual(p0_reward, 22000.0, "P0 reward must meet the 22k SLA")
 
 
 if __name__ == "__main__":

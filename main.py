@@ -397,7 +397,6 @@ def agent(obs: dict[str, Any], config: dict[str, Any] | None = None) -> dict[str
         urgent_water: list[tuple[int, int]] = []
         ready_harvest: list[tuple[int, int]] = []
         plantable: list[tuple[int, int]] = []
-        weed_tiles: list[tuple[int, int]] = []
         animal_tiles: list[tuple[int, int]] = []
         unfed_animals: list[tuple[int, int]] = []
         empty_structs: list[tuple[int, int]] = []
@@ -441,7 +440,7 @@ def agent(obs: dict[str, Any], config: dict[str, Any] | None = None) -> dict[str
                         else:
                             empty_structs.append((x, y))
                     elif k == "WEED":
-                        weed_tiles.append((x, y))
+                        pass  # Weeds handled by DIG action in worker dispatch
 
         has_animals = len(animal_tiles) > 0
         has_goose_shed = shed.get("GOOSE", 0) > 0
