@@ -118,25 +118,29 @@ Melon yields headline revenue of $250/unit, but features extreme market sensitiv
 
 ```
 ╔═══════════════════════════════════════════════════════════════════════════════════════════════════╗
-│          TITAN-1 vs STARTER BASELINE : MULTI-SEED TOURNAMENT BENCHMARK (720 TURNS)                │
+│          TITAN-1 vs STARTER BASELINE : 10-SEED TOURNAMENT BENCHMARK (720 TURNS)                  │
 ╠══════════╦═════════════════════╦═════════════════════╦═════════════════════╦══════════════╦═══════╣
 ║ SEED     ║ TITAN-1 CAPITAL     ║ STARTER CAPITAL     ║ WINNING DELTA       ║ RELATIVE ADV ║ RESULT║
 ╠══════════╬═════════════════════╬═════════════════════╬═════════════════════╬══════════════╬═══════╣
-║ Seed 1   ║ $9,890.00 Gold      ║ $3,433.00 Gold      ║ +$6,457.00 Gold     ║ +188.1% Lead ║ WIN   ║
-║ Seed 2   ║ $10,386.00 Gold     ║ $3,508.00 Gold      ║ +$6,878.00 Gold     ║ +196.1% Lead ║ WIN   ║
-║ Seed 3   ║ $9,257.00 Gold      ║ $3,468.00 Gold      ║ +$5,789.00 Gold     ║ +166.9% Lead ║ WIN   ║
-║ Seed 4   ║ $12,365.00 Gold     ║ $3,674.00 Gold      ║ +$8,691.00 Gold     ║ +236.6% Lead ║ WIN   ║
-║ Seed 5   ║ $12,516.00 Gold     ║ $3,477.00 Gold      ║ +$9,039.00 Gold     ║ +259.9% Lead ║ WIN   ║
-║ Seed 42  ║ $15,558.00 Gold     ║ $3,481.00 Gold      ║ +$12,077.00 Gold    ║ +346.9% Lead ║ WIN   ║
+║ Seed 1   ║ $28,577.00 Gold     ║ $3,501.00 Gold      ║ +$25,076.00 Gold    ║ +716.3% Lead ║ WIN   ║
+║ Seed 2   ║ $29,671.00 Gold     ║ $3,684.00 Gold      ║ +$25,987.00 Gold    ║ +705.4% Lead ║ WIN   ║
+║ Seed 3   ║ $27,662.00 Gold     ║ $3,936.00 Gold      ║ +$23,726.00 Gold    ║ +602.8% Lead ║ WIN   ║
+║ Seed 4   ║ $28,704.00 Gold     ║ $3,532.00 Gold      ║ +$25,172.00 Gold    ║ +712.7% Lead ║ WIN   ║
+║ Seed 5   ║ $28,553.00 Gold     ║ $3,645.00 Gold      ║ +$24,908.00 Gold    ║ +683.3% Lead ║ WIN   ║
+║ Seed 42  ║ $30,117.00 Gold     ║ $3,464.00 Gold      ║ +$26,653.00 Gold    ║ +769.4% Lead ║ WIN   ║
+║ Seed 100 ║ $28,382.00 Gold     ║ $3,592.00 Gold      ║ +$24,790.00 Gold    ║ +690.1% Lead ║ WIN   ║
+║ Seed 256 ║ $29,369.00 Gold     ║ $3,516.00 Gold      ║ +$25,853.00 Gold    ║ +735.3% Lead ║ WIN   ║
+║ Seed 777 ║ $29,807.00 Gold     ║ $3,637.00 Gold      ║ +$26,170.00 Gold    ║ +719.5% Lead ║ WIN   ║
+║ Seed 999 ║ $29,649.00 Gold     ║ $3,536.00 Gold      ║ +$26,113.00 Gold    ║ +738.5% Lead ║ WIN   ║
 ╠══════════╬═════════════════════╬═════════════════════╬═════════════════════╬══════════════╬═══════╣
-║ AVERAGE  ║ $11,662.00 GOLD     ║ $3,506.83 GOLD      ║ +$8,155.17 GOLD     ║ +232.6% LEAD ║ 100%  ║
+║ AVERAGE  ║ $29,049.10 GOLD     ║ $3,604.30 GOLD      ║ +$25,444.80 GOLD    ║ +705.9% LEAD ║ 100%  ║
 ╚══════════╩═════════════════════╩═════════════════════╩═════════════════════╩══════════════╩═══════╝
 ```
 
 ### 4.1. Key Strategic Findings from Benchmark Matches
-1. **Decisive Capital Superiority:** Across all 6 benchmark seeds, TITAN-1 generates an average of **$11,662.00 Gold**—more than **triple** the baseline's average ($3,506.83 Gold).
-2. **Husbandry & Crop Compounding ($15,558.00 on Seed 42):** With functional empty-tile crop rotation and livestock feed procurement, the single purchased goose survived the entire 720 turns, generating continuous high-value eggs ($50/egg + $50 care bonus) and daily fertilizer without a single escape or redundant re-purchase.
-3. **Fertilizer Acceleration on High-Margin Melons:** Fertilizer collected daily from the coop was applied directly to maturing melons (up to 19 applications in Seed 5, 17 in Seed 42), reaching the 6-unit cap reliably and boosting endgame liquidation.
+1. **Dominant Capital Multiplier:** Across all 10 canonical tournament seeds, TITAN-1 generates an average of **$29,049.10 Gold**—exceeding the baseline starter ($3,604.30 Gold) by more than **8.0×** and outperforming the official PRD performance SLA ($22,000.00) by +32.0%.
+2. **Husbandry & Compounding Production ($30,117.00 on Seed 42):** With active crop rotation, feed security buffers, and dedicated shed port routing, livestock compounding generated regular high-value eggs ($50/egg + care bonus) and daily fertilizer without a single animal starvation or escape.
+3. **Elasticity-Gated Selling & Terminal Liquidation:** Bounded intraday liquidations kept realized market prices well above 65% of base, culminating in an unconstrained Day 30 terminal liquidation sweep that converted 100% of shed inventory into gold before turn 719.
 
 ---
 
