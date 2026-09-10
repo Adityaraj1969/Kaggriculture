@@ -6,13 +6,14 @@
   SECURITY LEVEL: CHAMPIONSHIP SUBMISSION CANDIDATE // WORLD RANK #1 SPECIFICATION
 ============================================================================================== -->
 
-# ┌────────────────────────────────────────────────────────────────────────────────────────┐
-# │ LOCAL EVALUATION, ADVERSARIAL LEAGUE & BRADLEY-TERRY FRAMEWORK                         │
-# │ BENCHMARK RUNNER, INVARIANT PROFILER & DEPLOYMENT GATES                                 │
-# │ BENCHMARK PROTOCOL • STATISTICAL ASSURANCE FOR RANK #1 SUBMISSION                      │
-# └────────────────────────────────────────────────────────────────────────────────────────┘
+# Local Evaluation, Adversarial League & Bradley-Terry Framework
 
 ```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ LOCAL EVALUATION, ADVERSARIAL LEAGUE & BRADLEY-TERRY FRAMEWORK                         │
+│ BENCHMARK RUNNER, INVARIANT PROFILER & DEPLOYMENT GATES                                 │
+│ BENCHMARK PROTOCOL • STATISTICAL ASSURANCE FOR RANK #1 SUBMISSION                      │
+└────────────────────────────────────────────────────────────────────────────────────────┘
 [EVALUATION ENGINE: LEAGUE-v3.2]    [BENCHMARK TIERS: LOCAL & CANONICAL ADVERSARIES]
 [STATISTICAL MODEL: BRADLEY-TERRY] [CONCURRENCY: MULTI-PROCESS LOCAL HARNESS]
 [PASS CRITERIA: WIN RATE > 85.0%]  [PROFILER: 8 HARD INVARIANTS]

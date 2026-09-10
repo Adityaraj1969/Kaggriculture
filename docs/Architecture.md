@@ -6,13 +6,14 @@
   SECURITY LEVEL: CHAMPIONSHIP SUBMISSION CANDIDATE // WORLD RANK #1 SPECIFICATION
 ============================================================================================== -->
 
-# ┌────────────────────────────────────────────────────────────────────────────────────────┐
-# │ SYSTEM ARCHITECTURE SPECIFICATION // TITAN-1 KERNEL                                    │
-# │ 5-TIER HIGH-DENSITY MULTI-AGENT AGRO-ECONOMIC RUNTIME                                  │
-# │ ARCHITECTURAL BLUEPRINT • LOW-ALLOCATION NUMPY MODEL & DETERMINISTIC CONTROL           │
-# └────────────────────────────────────────────────────────────────────────────────────────┘
+# System Architecture Specification // TITAN-1 Kernel
 
 ```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ SYSTEM ARCHITECTURE SPECIFICATION // TITAN-1 KERNEL                                    │
+│ 5-TIER HIGH-DENSITY MULTI-AGENT AGRO-ECONOMIC RUNTIME                                  │
+│ ARCHITECTURAL BLUEPRINT • LOW-ALLOCATION NUMPY MODEL & DETERMINISTIC CONTROL           │
+└────────────────────────────────────────────────────────────────────────────────────────┘
 [SYSTEM KERNEL: TITAN-1.0.5-NOIR]    [MEMORY MODEL: PRE-ALLOCATED NUMPY TENSORS] [CYCLE BUDGET: 45MS COOPERATIVE]
 [DATA PIPELINE: 5 TIERS]            [SCHEDULER: GLOBAL MESH ROUTING]            [CONCURRENCY: SINGLE-THREADED]
 [SYSTEM TIMESTAMP: 2026-09-07T14:15Z] [TARGET PLATFORM: KAGGLE LINUX SANDBOX / PY 3.10]

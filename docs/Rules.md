@@ -6,13 +6,14 @@
   SECURITY LEVEL: CHAMPIONSHIP SUBMISSION CANDIDATE // WORLD RANK #1 SPECIFICATION
 ============================================================================================== -->
 
-# ┌────────────────────────────────────────────────────────────────────────────────────────┐
-# │ OFFICIAL GAME RULES, INVARIANTS & MATHEMATICAL MECHANICS                               │
-# │ GROUND-TRUTH SIMULATION REFERENCE • PROOFS, ELASTICITY & RECONCILIATION                │
-# │ PROVED AGAINST KAGGLE SIMULATION ENGINE & DEEPMIND TOURNAMENT CONTROLLER               │
-# └────────────────────────────────────────────────────────────────────────────────────────┘
+# Official Game Rules, Invariants & Mathematical Mechanics
 
 ```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ OFFICIAL GAME RULES, INVARIANTS & MATHEMATICAL MECHANICS                               │
+│ GROUND-TRUTH SIMULATION REFERENCE • PROOFS, ELASTICITY & RECONCILIATION                │
+│ PROVED AGAINST KAGGLE SIMULATION ENGINE & DEEPMIND TOURNAMENT CONTROLLER               │
+└────────────────────────────────────────────────────────────────────────────────────────┘
 [SPECIFICATION: KAGGRICULTURE-v1.2]  [ENGINE TIME-HORIZON: 720 TURNS] [GRID: 10x10 TOROIDAL-FREE]
 [ECONOMIC MODEL: NON-LINEAR ASYMMETRIC ELASTICITY] [TOWN DRAIN: STOCHASTIC POISSON PROCESS]
 [MATHEMATICAL VERIFICATION: 9/9 COMMODITIES INDEPENDENTLY CONFIRMED TO EXACT DOLLAR]

@@ -6,13 +6,14 @@
   SECURITY LEVEL: CHAMPIONSHIP SUBMISSION CANDIDATE // WORLD RANK #1 SPECIFICATION
 ============================================================================================== -->
 
-# ┌────────────────────────────────────────────────────────────────────────────────────────┐
-# │ CODE QUALITY, SYSTEMS ENGINEERING & HARDENED SAFETY STANDARDS                          │
-# │ LOW-ALLOCATION NUMPY POLICIES, DEFENSIVE SANITIZERS & DETERMINISTIC INVARIANTS         │
-# │ PRODUCTION STANDARD v3.2.0-NOIR • SUB-15MS DETERMINISTIC CONTROL                       │
-# └────────────────────────────────────────────────────────────────────────────────────────┘
+# Code Quality, Systems Engineering & Hardened Safety Standards
 
 ```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ CODE QUALITY, SYSTEMS ENGINEERING & HARDENED SAFETY STANDARDS                          │
+│ LOW-ALLOCATION NUMPY POLICIES, DEFENSIVE SANITIZERS & DETERMINISTIC INVARIANTS         │
+│ PRODUCTION STANDARD v3.2.0-NOIR • SUB-15MS DETERMINISTIC CONTROL                       │
+└────────────────────────────────────────────────────────────────────────────────────────┘
 [STANDARDS: ISO/IEC 25010 HIGH-INTEGRITY] [COMPILER: MYPY --STRICT] [LINTER: RUFF 0.4.x]
 [MEMORY DISCIPLINE: LOW-ALLOCATION TENSORS] [TEST MATRIX: HYPOTHESIS PROPERTY TESTING]
 [SAFETY: 45MS COOPERATIVE DEADLINE]       [ZERO EXCEPTION GUARANTEE: ACTIVE]

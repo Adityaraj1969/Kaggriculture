@@ -6,13 +6,14 @@
   SECURITY LEVEL: CHAMPIONSHIP SUBMISSION CANDIDATE // RANK #1 SPECIFICATION
 ============================================================================================== -->
 
-# ┌────────────────────────────────────────────────────────────────────────────────────────┐
-# │ EDITORIAL DEVELOPER NOIR // CINEMATIC TERMINAL UI/UX SPECIFICATION                     │
-# │ THE DOCKET // TITAN OBSERVATORY • MISSION-CONTROL AGRO-ECONOMIC TELEMETRY DASHBOARD    │
-# │ DESIGN SPECIFICATION FOR PROTOTYPE VISUALIZATION & SPECTATOR REPLAY                    │
-# └────────────────────────────────────────────────────────────────────────────────────────┘
+# Editorial Developer Noir // Cinematic Terminal UI/UX Specification
 
 ```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ EDITORIAL DEVELOPER NOIR // CINEMATIC TERMINAL UI/UX SPECIFICATION                     │
+│ THE DOCKET // TITAN OBSERVATORY • MISSION-CONTROL AGRO-ECONOMIC TELEMETRY DASHBOARD    │
+│ DESIGN SPECIFICATION FOR PROTOTYPE VISUALIZATION & SPECTATOR REPLAY                    │
+└────────────────────────────────────────────────────────────────────────────────────────┘
 [DISPLAY ENGINE: CRT-PHOSPHOR / TERMINAL NOIR] [ATMOSPHERIC TENSION: MAXIMUM]
 [PALETTE: OBSIDIAN / CARBON / LASER GREEN / AMBER / SIGNAL CRIMSON / GLITCH CYAN]
 [TYPOGRAPHY: JETBRAINS MONO x IBM PLEX MONO x TABULAR NUMERALS]

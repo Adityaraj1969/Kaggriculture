@@ -6,13 +6,14 @@
   SECURITY LEVEL: CHAMPIONSHIP SUBMISSION CANDIDATE // WORLD RANK #1 SPECIFICATION
 ============================================================================================== -->
 
-# ┌────────────────────────────────────────────────────────────────────────────────────────┐
-# │ PROJECT COMBINE // TITAN-1 : AUTONOMOUS AGRO-ECONOMIC RUNTIME                          │
-# │ SYSTEM ARCHITECTURE PRD • HIGH-DENSITY TOURNAMENT SPECIFICATION                        │
-# │ SPONSORED BY GOOGLE LLC • KAGGLE SIMULATIONS BENCHMARK                                  │
-# └────────────────────────────────────────────────────────────────────────────────────────┘
+# Project Combine // TITAN-1 : Autonomous Agro-Economic Runtime
 
 ```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ PROJECT COMBINE // TITAN-1 : AUTONOMOUS AGRO-ECONOMIC RUNTIME                          │
+│ SYSTEM ARCHITECTURE PRD • HIGH-DENSITY TOURNAMENT SPECIFICATION                        │
+│ SPONSORED BY GOOGLE LLC • KAGGLE SIMULATIONS BENCHMARK                                  │
+└────────────────────────────────────────────────────────────────────────────────────────┘
 [SYSTEM: INITIALIZED]        [ENGINE: TITAN-1.0.5-NOIR]    [ENV: LINUX-PY310-SANDBOX]
 [SUBMISSION REGIME: LATEST-2] [CONVERGENCE: BRADLEY-TERRY]  [TARGET: RANK #1 WORLD ($5k GRAND)]
 [TIMELINE: JUL 29 - OCT 15]   [SEASON HORIZON: 720 TURNS]   [CYCLE BUDGET: < 45MS COOPERATIVE DEADLINE]

@@ -6,16 +6,17 @@
   SECURITY LEVEL: CHAMPIONSHIP SUBMISSION CANDIDATE // WORLD RANK #1 SPECIFICATION
 ============================================================================================== -->
 
-# ┌────────────────────────────────────────────────────────────────────────────────────────┐
-# │ ADVANCED AI STRATEGY & GAME-THEORETIC OPTIMIZATION ENGINE                              │
-# │ RELATIVE OBJECTIVES, POSTURE SHIFTS, MHI METRICS & DUMP DEFENSE                        │
-# │ RESEARCH SPECIFICATION • MATHEMATICAL FOUNDATIONS FOR TOURNAMENT CROWN                 │
-# └────────────────────────────────────────────────────────────────────────────────────────┘
+# Advanced AI Strategy & Game-Theoretic Optimization Engine
 
 ```
-[SYSTEM: STRATEGY-AI-CORE]    [OBJECTIVE FUNCTION: P(MY_MONEY > OPP_MONEY)]
-[EQUILIBRIUM: DUMP HEDGING]   [FILTER: BAYESIAN MASS-BALANCE SHED RECONCILER]
-[POSTURE MATRIX: 5 DYNAMIC MODES] [DOCUMENT ID: COMBINE-STRAT-05] [STATUS: RATIFIED]
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ ADVANCED AI STRATEGY & GAME-THEORETIC OPTIMIZATION ENGINE                              │
+│ RELATIVE OBJECTIVES, POSTURE SHIFTS, MHI METRICS & DUMP DEFENSE                        │
+│ RESEARCH SPECIFICATION • MATHEMATICAL FOUNDATIONS FOR TOURNAMENT CROWN                 │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+[SYSTEM: STRATEGY-AI-CORE]         [OBJECTIVE FUNCTION: P(MY_MONEY > OPP_MONEY)]
+[EQUILIBRIUM: DUMP HEDGING]        [FILTER: BAYESIAN MASS-BALANCE SHED RECONCILER]
+[POSTURE MATRIX: 5 DYNAMIC MODES]  [DOCUMENT ID: COMBINE-STRAT-05] [STATUS: RATIFIED]
 ```
 
 *The market doesn't care how much you love your melons.*

@@ -6,13 +6,14 @@
   SECURITY LEVEL: CHAMPIONSHIP SUBMISSION CANDIDATE // WORLD RANK #1 SPECIFICATION
 ============================================================================================== -->
 
-# ┌────────────────────────────────────────────────────────────────────────────────────────┐
-# │ EVENT-DRIVEN SEASONAL PHASES & DYNAMIC MACRO ROADMAP                                   │
-# │ NON-LINEAR TURN-BY-TURN TRANSITION MATRIX ACROSS 720 STEPS (STEPS 0–719)               │
-# │ PRODUCTION SPECIFICATION • 4 ECONOMIC PHASES + 1 AUTARKIC CONTINGENCY                  │
-# └────────────────────────────────────────────────────────────────────────────────────────┘
+# Event-Driven Seasonal Phases & Dynamic Macro Roadmap
 
 ```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ EVENT-DRIVEN SEASONAL PHASES & DYNAMIC MACRO ROADMAP                                   │
+│ NON-LINEAR TURN-BY-TURN TRANSITION MATRIX ACROSS 720 STEPS (STEPS 0–719)               │
+│ PRODUCTION SPECIFICATION • 4 ECONOMIC PHASES + 1 AUTARKIC CONTINGENCY                  │
+└────────────────────────────────────────────────────────────────────────────────────────┘
 [HORIZON: 720 DISCRETE TURNS (0..719)] [TEMPORAL UNITS: 30 DAYS x 24 HOURS] [REGIME: DYNAMIC VELOCITY]
 [CAPITAL TARGET: >$22,000.00 GOLD]     [STATE RESOLUTION: EVENT-TRIGGERED]  [CONTINGENCY: CLOSED-LOOP MHI]
 [DOCUMENT ID: COMBINE-PHASE-06]        [STATUS: RATIFIED SPECIFICATION]
