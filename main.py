@@ -1,17 +1,15 @@
 """
-==============================================================================================
-KAGGRICULTURE TITAN-1 :: CHAMPIONSHIP AUTONOMOUS AGENT (PRODUCTION CANDIDATE)
-SPONSOR: GOOGLE LLC | PLATFORM: KAGGLE COMPETITIONS ($50,000 TOURNAMENT POOL)
-==============================================================================================
+TITAN-1 v3 :: Championship Agent
+Kaggle Kaggriculture ($50,000 Tournament)
+Strategy: Aggressive crops + livestock economy + max workforce.
 """
 
 import math
-import time
 from typing import Any
 
-# ==============================================================================================
-# CANONICAL ENGINE CONSTANTS (Rules.md, kaggriculture.py)
-# ==============================================================================================
+# ============================================================================
+# CONSTANTS
+# ============================================================================
 
 CROPS: dict[str, dict[str, Any]] = {
     "WHEAT":      {"seed": 10, "first_yield_day": 2, "max_yield_day": 4, "interval": 0, "max_yield": 6, "ongoing": False},
@@ -21,15 +19,8 @@ CROPS: dict[str, dict[str, Any]] = {
     "MELON":      {"seed": 80, "first_yield_day": 10, "max_yield_day": 12, "interval": 0, "max_yield": 6, "ongoing": False},
 }
 
-ANIMALS: dict[str, dict[str, Any]] = {
-    "GOOSE": {"cost": 300, "structure": "COOP",    "first_yield_day": 4, "interval": 1, "max_held": 4, "product": "EGG"},
-    "COW":   {"cost": 400, "structure": "PASTURE", "first_yield_day": 8, "interval": 2, "max_held": 6, "product": "MILK"},
-    "SHEEP": {"cost": 500, "structure": "PASTURE", "first_yield_day": 6, "interval": 3, "max_held": 6, "product": "WOOL"},
-}
-
 PRODUCTS = ["WHEAT", "CARROT", "TOMATO", "STRAWBERRY", "MELON", "EGG", "MILK", "WOOL", "FERTILIZER"]
 
-# Engine-exact market parameters (kaggriculture.py)
 MARKET_I0 = 10000
 PRICE_FLOOR = 1
 HINGE_GAIN = 8.0
@@ -46,713 +37,536 @@ MARKET_PARAMS: dict[str, dict[str, Any]] = {
     "FERTILIZER": {"base": 100, "I0": MARKET_I0, "T": 200, "below_func": "linear", "below_target": 0.40, "above_func": "linear", "above_target": 0.40},
 }
 
-FRAGILE_COMMODITIES = {"MELON", "STRAWBERRY", "MILK", "WOOL"}
-
-# Gestation cutoffs: last day to plant for ANY yield
 LAST_PLANT_DAY = {"WHEAT": 27, "CARROT": 27, "MELON": 19, "TOMATO": 21, "STRAWBERRY": 19}
-
-# Land quadrant costs (sequential unlock: NE -> SW -> SE)
 QUADRANT_COSTS = {1: 1000, 2: 2000, 3: 4000}
 
-# Central shed portals
-SHED_ACCESS_TILES = {(4, 4), (5, 4), (4, 5), (5, 5)}
+# Build spots per quadrant — each quadrant has multiple structure slots
+# NW quadrant (always unlocked)
+NW_PASTURE = [(3, 3), (1, 4), (3, 1), (0, 2), (1, 2), (0, 0)]
+NW_COOP = [(4, 3), (2, 4), (4, 1), (0, 3)]
+# NE quadrant (first expansion)
+NE_PASTURE = [(6, 3), (8, 4), (6, 1), (9, 2)]
+NE_COOP = [(5, 3), (7, 4), (5, 1), (9, 3)]
+# SW quadrant (second expansion)
+SW_PASTURE = [(3, 6), (1, 8), (3, 9), (0, 7)]
+SW_COOP = [(4, 6), (2, 8), (4, 9), (0, 8)]
 
-# Engine-exact town shops (kaggriculture.py SHOPS)
-SHOPS = {
-    "BAKERY":         ["EGG", "WHEAT"],
-    "PIZZA_SHOP":     ["MILK", "TOMATO", "WHEAT"],
-    "BRUNCH_SPOT":    ["EGG", "WHEAT", "STRAWBERRY"],
-    "YARN_STORE":     ["WOOL"],
-    "ICE_CREAM_SHOP": ["STRAWBERRY", "MILK", "WHEAT"],
-    "PET_CAFE":       ["CARROT"],
-    "SMOOTHIE_SHOP":  ["STRAWBERRY", "MILK"],
-    "FARMERS_MARKET": ["WHEAT", "CARROT", "TOMATO", "STRAWBERRY"],
-}
+SHED_ACCESS_TILES = {(4, 4), (5, 4), (4, 5), (5, 5)}
 
 
 def _fib(n: int) -> int:
-    """Fibonacci(n) for hiring costs. fib(0)=1, fib(1)=1, fib(2)=2, ..."""
     a, b = 1, 1
     for _ in range(n):
         a, b = b, a + b
     return a
 
 
-# ==============================================================================================
-# ENGINE-EXACT PRICE SIMULATION (FR-02, Rules.md section 6)
-# ==============================================================================================
-
 def _shape(func: str, x: float, T: float = 0.0) -> float:
-    """Exact replica of kaggriculture.py _shape function."""
     x = max(0.0, x)
-    if func == "linear":
-        return x
-    if func == "sq":
-        return x * x
-    if func == "sqrt":
-        return math.sqrt(x)
-    if func == "log":
-        return math.log(1.0 + x)
-    if func == "log10":
-        return math.log10(1.0 + x)
+    if func == "linear": return x
+    if func == "sq": return x * x
+    if func == "sqrt": return math.sqrt(x)
+    if func == "log": return math.log(1.0 + x)
+    if func == "log10": return math.log10(1.0 + x)
     if func == "hinge":
-        if T <= 0:
-            return x
+        if T <= 0: return x
         u = x / T
         return u + HINGE_GAIN * max(0.0, u - 1.0) ** 2
     return x
 
 
 def market_price(item: str, inventory: int) -> int:
-    """Compute exact market price matching the engine. Floor at PRICE_FLOOR."""
     p = MARKET_PARAMS[item]
-    base = float(p["base"])
-    I0 = float(p["I0"])
-    T = float(p["T"])
+    base, I0, T = float(p["base"]), float(p["I0"]), float(p["T"])
     if inventory < I0:
-        f = str(p["below_func"])
-        below_target = float(p["below_target"])
-        amp = below_target * base / _shape(f, T, T)
+        f, bt = str(p["below_func"]), float(p["below_target"])
+        amp = bt * base / _shape(f, T, T)
         price = base + amp * _shape(f, I0 - inventory, T)
     else:
-        f = str(p["above_func"])
-        above_target = float(p["above_target"])
-        amp = above_target * base / _shape(f, T, T)
+        f, at = str(p["above_func"]), float(p["above_target"])
+        amp = at * base / _shape(f, T, T)
         price = base - amp * _shape(f, inventory - I0, T)
     return max(PRICE_FLOOR, int(round(price)))
 
 
-# ==============================================================================================
-# BAYESIAN OPPONENT TRACKER (FR-02, FR-03, FR-04)
-# ==============================================================================================
+# ============================================================================
+# NAVIGATION
+# ============================================================================
 
-class BayesianOpponentTracker:
-    """Reconstructs opponent hidden shed inventory via mass-balance reconciliation."""
-
-    def __init__(self) -> None:
-        self.commodities = [p for p in PRODUCTS if p != "FERTILIZER"]
-        self.hoarded_shed_est: dict[str, int] = {c: 0 for c in self.commodities}
-        self.prev_opp_tiles: list[list[Any]] | None = None
-        self.prev_market_inv: dict[str, int] | None = None
-        self.our_sales: dict[str, int] = {c: 0 for c in self.commodities}
-        self.our_buys: dict[str, int] = {c: 0 for c in self.commodities}
-
-    def record_own_orders(self, orders: list[list[Any]]) -> None:
-        self.our_sales = {c: 0 for c in self.commodities}
-        self.our_buys = {c: 0 for c in self.commodities}
-        for cmd in orders:
-            if not isinstance(cmd, (list, tuple)) or len(cmd) < 3:
-                continue
-            act, item, qty = cmd[0], cmd[1], int(cmd[2])
-            if act == "SELL" and item in self.our_sales:
-                self.our_sales[item] += qty
-            elif act in ("BUY_PRODUCT",) and item in self.our_buys:
-                self.our_buys[item] += qty
-
-    def update(self, opp_tiles: list[list[Any]] | None, market_inv: dict[str, int],
-               step: int, shops: list[str]) -> None:
-        # Detect opponent harvests
-        if self.prev_opp_tiles is not None and opp_tiles is not None:
-            for y in range(min(10, len(opp_tiles))):
-                for x in range(min(10, len(opp_tiles[y]))):
-                    prev = self.prev_opp_tiles[y][x]
-                    curr = opp_tiles[y][x]
-                    if isinstance(prev, dict) and prev.get("kind") == "PLANT":
-                        crop = prev.get("crop")
-                        if curr is None or (isinstance(curr, dict) and curr.get("kind") != "PLANT"):
-                            harvested = max(1, prev.get("yield_units", 1))
-                            if crop in self.hoarded_shed_est:
-                                self.hoarded_shed_est[crop] += harvested
-
-        # Reconcile market delta vs town drain
-        if self.prev_market_inv is not None and market_inv:
-            drain = self._calc_town_drain(step, shops)
-            for c in self.commodities:
-                curr_i = market_inv.get(c, MARKET_I0)
-                prev_i = self.prev_market_inv.get(c, MARKET_I0)
-                delta = curr_i - prev_i
-                opp_sales = (delta + drain.get(c, 0) - self.our_sales.get(c, 0)
-                             + self.our_buys.get(c, 0))
-                if opp_sales > 0:
-                    self.hoarded_shed_est[c] = max(0, self.hoarded_shed_est[c] - opp_sales)
-
-        self.prev_opp_tiles = [row[:] for row in opp_tiles] if opp_tiles else None
-        self.prev_market_inv = dict(market_inv) if market_inv else None
-
-    def _calc_town_drain(self, step: int, shops: list[str]) -> dict[str, int]:
-        drain: dict[str, int] = {c: 0 for c in self.commodities}
-        if step % 24 == 0:
-            for c in self.commodities:
-                drain[c] += 1
-        if step % 4 == 0:
-            for shop_name in shops:
-                products = SHOPS.get(shop_name, [])
-                mult = 2 if len(products) == 1 else 1
-                for item in products:
-                    if item in drain:
-                        drain[item] += mult
-        return drain
-
-    def get_dump_hazard(self, commodity: str) -> float:
-        stock = self.hoarded_shed_est.get(commodity, 0)
-        return float(1.0 - math.exp(-stock / 12.0))
-
-
-# ==============================================================================================
-# NAVIGATION HELPERS
-# ==============================================================================================
-
-def _get_quadrant(x: int, y: int) -> int:
+def _quadrant(x: int, y: int) -> int:
     if x < 5 and y < 5: return 0
     if x >= 5 and y < 5: return 1
     if x < 5 and y >= 5: return 2
     return 3
 
 
-def _is_unlocked(x: int, y: int, uq: set[int]) -> bool:
-    return _get_quadrant(x, y) in uq
+def _unlocked(x: int, y: int, uq: set[int]) -> bool:
+    return _quadrant(x, y) in uq
 
 
-def _manhattan(x1: int, y1: int, x2: int, y2: int) -> int:
+def _dist(x1: int, y1: int, x2: int, y2: int) -> int:
     return abs(x1 - x2) + abs(y1 - y2)
 
 
-def _step_towards(cx: int, cy: int, tx: int, ty: int) -> list[str]:
-    """Single greedy step towards target. All tiles are walkable (engine allows
-    movement onto locked tiles; only field actions are blocked)."""
-    if cx == tx and cy == ty:
-        return ["PASS"]
-    best_dir = "PASS"
-    best_dist = _manhattan(cx, cy, tx, ty)
-    for dx, dy, name in [(0, -1, "NORTH"), (0, 1, "SOUTH"), (-1, 0, "WEST"), (1, 0, "EAST")]:
+def _move(cx: int, cy: int, tx: int, ty: int) -> list[str]:
+    if cx == tx and cy == ty: return ["PASS"]
+    best, bd = "PASS", _dist(cx, cy, tx, ty)
+    for dx, dy, d in [(0, -1, "NORTH"), (0, 1, "SOUTH"), (-1, 0, "WEST"), (1, 0, "EAST")]:
         nx, ny = cx + dx, cy + dy
         if 0 <= nx < 10 and 0 <= ny < 10:
-            d = _manhattan(nx, ny, tx, ty)
-            if d < best_dist:
-                best_dist = d
-                best_dir = name
-    return [best_dir]
+            dd = _dist(nx, ny, tx, ty)
+            if dd < bd: bd, best = dd, d
+    return [best]
 
 
-def _nearest(wx: int, wy: int, tiles_list: list[tuple[int, int]]) -> tuple[int, int]:
-    """Find nearest tile from a list."""
-    if not tiles_list:
-        return (0, 0)
-    return min(tiles_list, key=lambda t: _manhattan(wx, wy, t[0], t[1]))
+def _nearest(wx: int, wy: int, pts: list[tuple[int, int]]) -> tuple[int, int]:
+    if not pts: return (4, 4)
+    return min(pts, key=lambda p: _dist(wx, wy, p[0], p[1]))
 
 
-def _find_target(wx: int, wy: int,
-                 urgent_water: list[tuple[int, int]],
-                 ready_harvest: list[tuple[int, int]],
-                 plantable: list[tuple[int, int]],
-                 unfed: list[tuple[int, int]],
-                 claimed: set[tuple[int, int]]) -> tuple[int, int]:
-    """Find the nearest high-priority unclaimed task tile."""
-    for tile_list in [unfed, urgent_water, ready_harvest, plantable]:
-        unclaimed = [t for t in tile_list if t not in claimed]
-        if unclaimed:
-            return _nearest(wx, wy, unclaimed)
-    return (0, 0)
+def _pasture_spots(uq: set[int]) -> list[tuple[int, int]]:
+    spots = list(NW_PASTURE)
+    if 1 in uq: spots += NE_PASTURE
+    if 2 in uq: spots += SW_PASTURE
+    return spots
 
 
-# ==============================================================================================
-# PLANTING PRIORITY
-# ==============================================================================================
-
-def _get_plant_order(posture: str, day: int, days_left: int,
-                     shed: dict[str, int]) -> list[str]:
-    """Returns ordered list of crops to plant based on posture and timing."""
-    if posture == "AUTARKY":
-        return ["WHEAT"]
-    if posture == "LEADING":
-        return ["WHEAT", "CARROT"]
-    if posture == "ENDGAME":
-        return ["WHEAT", "CARROT"] if days_left >= 3 else []
-    if posture == "TRAILING":
-        result: list[str] = []
-        if days_left >= 12: result.append("MELON")
-        if days_left >= 16: result.append("STRAWBERRY")
-        if days_left >= 11: result.append("TOMATO")
-        if shed.get("WHEAT", 0) < 2: result.append("WHEAT")
-        result.append("CARROT")
-        if "WHEAT" not in result: result.append("WHEAT")
-        return result
-    # BALANCED
-    result = []
-    if days_left >= 12: result.append("MELON")
-    if shed.get("WHEAT", 0) < 2: result.append("WHEAT")
-    result.append("CARROT")
-    if "WHEAT" not in result: result.append("WHEAT")
-    return result
+def _coop_spots(uq: set[int]) -> list[tuple[int, int]]:
+    spots = list(NW_COOP)
+    if 1 in uq: spots += NE_COOP
+    if 2 in uq: spots += SW_COOP
+    return spots
 
 
-# ==============================================================================================
-# MARKET HEALTH INDEX (FR-20)
-# ==============================================================================================
+# ============================================================================
+# STATE
+# ============================================================================
 
-def _compute_mhi(market_inv: dict[str, int]) -> tuple[float, float]:
-    """Returns (MHI_aggregate, MHI_fragile)."""
-    ratios: list[float] = []
-    fragile: list[float] = []
-    for item in PRODUCTS:
-        if item == "FERTILIZER":
-            continue
-        inv = market_inv.get(item, MARKET_I0)
-        price = market_price(item, inv)
-        base = float(MARKET_PARAMS[item]["base"])
-        r = price / base
-        ratios.append(r)
-        if item in FRAGILE_COMMODITIES:
-            fragile.append(r)
-    mhi_agg = sum(ratios) / len(ratios) if ratios else 1.0
-    mhi_frag = min(fragile) if fragile else 1.0
-    return mhi_agg, mhi_frag
+class _S:
+    prev = -1
+_ST = _S()
 
 
-# ==============================================================================================
-# TITAN-1 STATE
-# ==============================================================================================
+# ============================================================================
+# HELPER FUNCTIONS (must be before agent — engine uses get_last_callable)
+# ============================================================================
 
-class _TitanState:
-    def __init__(self) -> None:
-        self.tracker = BayesianOpponentTracker()
-        self.posture = "BALANCED"
-        self.prev_step = -1
+def _plant(seeds: dict, su: dict, day: int, dleft: int) -> list[Any]:
+    order = []
+    if dleft >= 3: order.append("WHEAT")
+    if dleft >= 3: order.append("CARROT")
+    if dleft >= 12: order.append("STRAWBERRY")
+    if dleft >= 12: order.append("MELON")
+    if dleft >= 10: order.append("TOMATO")
+    for c in order:
+        if day > LAST_PLANT_DAY.get(c, 30): continue
+        if seeds.get(c, 0) - su.get(c, 0) > 0:
+            return ["PLANT", c]
+    return ["PASS"]
 
-    def reset(self) -> None:
-        self.tracker = BayesianOpponentTracker()
-        self.posture = "BALANCED"
-        self.prev_step = -1
+
+def _work(wx: int, wy: int, water: list, harvest: list, empty: list,
+          unfed: list, afert: list, aharvest: list,
+          claimed: set) -> tuple[int, int]:
+    for lst in [unfed, afert, water, aharvest, harvest, empty]:
+        unc = [t for t in lst if t not in claimed]
+        if unc:
+            b = _nearest(wx, wy, unc)
+            claimed.add(b)
+            return b
+    return (4, 4)
 
 
-_ST = _TitanState()
-
-
-# ==============================================================================================
-# MAIN AGENT ENTRY POINT
-# ==============================================================================================
+# ============================================================================
+# MAIN AGENT (must be LAST callable — Kaggle engine uses get_last_callable)
+# ============================================================================
 
 def agent(obs: dict[str, Any], config: dict[str, Any] | None = None) -> dict[str, Any]:
-    """TITAN-1 Championship Agent. Sub-40ms execution, zero-crash guarantee."""
-    t0 = time.perf_counter()
-    FALLBACK: dict[str, Any] = {"farmer": ["PASS"], "hands": [], "market": []}
-
+    """TITAN-1 v3 Championship Agent."""
+    FB: dict[str, Any] = {"farmer": ["PASS"], "hands": [], "market": []}
     try:
-        # ==== PERCEPTION ====
         pid = obs.get("player", 0)
         farms = obs.get("farms", [{}, {}])
-        my_farm = farms[pid] if pid < len(farms) else {}
-        opp_farm = farms[1 - pid] if (1 - pid) < len(farms) else {}
-        private = obs.get("private", {})
-        shed = private.get("shed", {})
-        seeds = private.get("seeds", {})
-        inventories = private.get("inventories", [{}])
-        market_obs = obs.get("market", {})
-        market_inv = market_obs.get("inventory", {}) if isinstance(market_obs, dict) else {}
-        town_obs = obs.get("town", {})
-        shops = town_obs.get("unlocked_shops", []) if isinstance(town_obs, dict) else []
+        mf = farms[pid] if pid < len(farms) else {}
+        priv = obs.get("private", {})
+        shed = priv.get("shed", {})
+        seeds = priv.get("seeds", {})
+        invs = priv.get("inventories", [{}])
+        mkt = obs.get("market", {})
+        mkt_inv = mkt.get("inventory", {}) if isinstance(mkt, dict) else {}
 
         day = int(obs.get("day", 0))
         hour = int(obs.get("hour", 0))
         step = int(obs.get("step", day * 24 + hour))
-        days_left = 30 - day
-        is_endgame = day >= 29 or step >= 696
+        dleft = 30 - day
+        endgame = day >= 28
 
-        tiles = my_farm.get("tiles", [])
-        my_money = float(my_farm.get("money", 0.0))
-        opp_money = float(opp_farm.get("money", 0.0))
-        money_gap = my_money - opp_money
+        tiles = mf.get("tiles", [])
+        money = float(mf.get("money", 0.0))
 
-        # Reset on new episode
-        if step == 0 or step < _ST.prev_step:
-            _ST.reset()
-        _ST.prev_step = step
+        if step == 0 or step < _ST.prev:
+            _ST.prev = -1
+        _ST.prev = step
 
         # Unlocked quadrants
         uq: set[int] = {0}
-        for q in my_farm.get("unlocked_quadrants", ["NW"]):
+        for q in mf.get("unlocked_quadrants", ["NW"]):
             if isinstance(q, int) and 0 <= q <= 3: uq.add(q)
             elif q == "NW": uq.add(0)
             elif q == "NE": uq.add(1)
             elif q == "SW": uq.add(2)
             elif q == "SE": uq.add(3)
 
-        # ==== BAYESIAN UPDATE & POSTURE ====
-        _ST.tracker.update(opp_farm.get("tiles"), market_inv, step, shops)
-        mhi_agg, mhi_frag = _compute_mhi(market_inv)
+        # ---- TILE SURVEY ----
+        water: list[tuple[int, int]] = []       # need watering
+        harvest: list[tuple[int, int]] = []      # ready to harvest crop
+        empty: list[tuple[int, int]] = []        # plantable empty tiles
+        unfed: list[tuple[int, int]] = []        # animals needing feed
+        uncared: list[tuple[int, int]] = []      # animals needing care
+        aharvest: list[tuple[int, int]] = []     # animals with product
+        afert: list[tuple[int, int]] = []        # animals with fertilizer
+        estructs: list[tuple[int, int]] = []     # empty structures
+        structs: list[tuple[int, int]] = []      # all structures
+        weeds: list[tuple[int, int]] = []
 
-        if mhi_frag < 0.50 or mhi_agg < 0.70:
-            _ST.posture = "AUTARKY"
-        elif is_endgame:
-            _ST.posture = "ENDGAME"
-        elif money_gap > 3000:
-            _ST.posture = "LEADING"
-        elif money_gap < -3000:
-            _ST.posture = "TRAILING"
-        else:
-            _ST.posture = "BALANCED"
-        posture = _ST.posture
-
-        # ==== TILE SURVEY ====
-        urgent_water: list[tuple[int, int]] = []
-        ready_harvest: list[tuple[int, int]] = []
-        plantable: list[tuple[int, int]] = []
-        animal_tiles: list[tuple[int, int]] = []
-        unfed_animals: list[tuple[int, int]] = []
-        empty_structs: list[tuple[int, int]] = []
-        unfert_melon: list[tuple[int, int]] = []
-        harvestable_animal: list[tuple[int, int]] = []
-        fert_avail: list[tuple[int, int]] = []
-        all_structs: list[tuple[int, int]] = []
-
-        for y in range(10):
-            if y >= len(tiles): break
-            for x in range(10):
-                if x >= len(tiles[y]): break
-                if not _is_unlocked(x, y, uq): continue
+        for y in range(min(10, len(tiles))):
+            for x in range(min(10, len(tiles[y]))):
+                if not _unlocked(x, y, uq): continue
                 t = tiles[y][x]
                 if t is None:
-                    plantable.append((x, y))
+                    if (x, y) not in SHED_ACCESS_TILES:
+                        empty.append((x, y))
                 elif isinstance(t, dict):
                     k = t.get("kind")
                     if k == "PLANT":
-                        crop = t.get("crop", "WHEAT")
-                        cd = CROPS.get(crop, CROPS["WHEAT"])
+                        cr = t.get("crop", "WHEAT")
+                        cd = CROPS.get(cr, CROPS["WHEAT"])
                         age = day - t.get("planted_day", 0)
                         if not t.get("watered_today", False):
-                            urgent_water.append((x, y))
+                            water.append((x, y))
                         yu = t.get("yield_units", 0)
                         if age >= cd["first_yield_day"] and (
-                            yu >= cd["max_yield"] or age >= cd["max_yield_day"] or days_left <= 2):
-                            ready_harvest.append((x, y))
-                        if crop == "MELON" and t.get("fertilized_until_day", -1) < day and age < cd["max_yield_day"]:
-                            unfert_melon.append((x, y))
+                            yu >= cd["max_yield"] or age >= cd["max_yield_day"] or dleft <= 2):
+                            harvest.append((x, y))
                     elif k in ("COOP", "PASTURE"):
-                        all_structs.append((x, y))
+                        structs.append((x, y))
                         if t.get("animal"):
-                            animal_tiles.append((x, y))
                             if not t.get("fed_today", False):
-                                unfed_animals.append((x, y))
+                                unfed.append((x, y))
+                            if not t.get("cared_today", False):
+                                uncared.append((x, y))
                             if t.get("yield_units", 0) > 0:
-                                harvestable_animal.append((x, y))
+                                aharvest.append((x, y))
                             if t.get("fertilizer_available", False):
-                                fert_avail.append((x, y))
+                                afert.append((x, y))
                         else:
-                            empty_structs.append((x, y))
+                            estructs.append((x, y))
                     elif k == "WEED":
-                        pass  # Weeds handled by DIG action in worker dispatch
+                        weeds.append((x, y))
 
-        has_animals = len(animal_tiles) > 0
-        has_goose_shed = shed.get("GOOSE", 0) > 0
-        has_goose_inv = any(inv.get("GOOSE", 0) > 0 for inv in inventories)
-        has_goose_placed = any(
-            isinstance(tiles[y][x], dict) and tiles[y][x].get("animal") == "GOOSE"
-            for y in range(min(10, len(tiles)))
-            for x in range(min(10, len(tiles[y]) if y < len(tiles) else 0))
-            if isinstance(tiles[y][x], dict)
-        )
-        has_any_struct = len(all_structs) > 0
+        # Animal census
+        def _cnt(kind: str) -> tuple[int, int]:
+            pl = sum(1 for y2 in range(min(10, len(tiles)))
+                     for x2 in range(min(10, len(tiles[y2]) if y2 < len(tiles) else 0))
+                     if isinstance(tiles[y2][x2], dict) and tiles[y2][x2].get("animal") == kind)
+            pend = shed.get(kind, 0) + sum(iv.get(kind, 0) for iv in invs)
+            return pl, pend
 
-        # ==== MARKET ORDERS ====
-        market_orders: list[list[Any]] = []
+        cow_p, cow_q = _cnt("COW")
+        sheep_p, sheep_q = _cnt("SHEEP")
+        goose_p, goose_q = _cnt("GOOSE")
 
-        # (A) LEAKY-BUCKET SELLING (FR-14, FR-15, FR-16, FR-17)
-        sell_list: list[tuple[float, str, int]] = []
+        n_past = sum(1 for ex, ey in structs
+                     if isinstance(tiles[ey][ex], dict) and tiles[ey][ex].get("kind") == "PASTURE")
+        n_coop = sum(1 for ex, ey in structs
+                     if isinstance(tiles[ey][ex], dict) and tiles[ey][ex].get("kind") == "COOP")
+        total_a = cow_p + sheep_p + goose_p
+
+        # How many structures do we NEED vs HAVE?
+        need_pasture = max(0, (cow_p + cow_q + sheep_p + sheep_q) - n_past)
+        need_coop = max(0, (goose_p + goose_q) - n_coop)
+
+        # ---- MARKET ORDERS ----
+        orders: list[list[Any]] = []
+        nh = len(mf.get("hands", []))
+
+        # (A) SELL everything from shed
+        wt_reserve = max(2, total_a + cow_q + sheep_q + goose_q) if not endgame else 0
         for item in PRODUCTS:
-            stock = shed.get(item, 0)
-            if stock <= 0: continue
-            reserve = 0
-            if not is_endgame:
-                if item == "WHEAT" and (has_animals or has_goose_shed or shed.get("COW", 0) > 0):
-                    reserve = max(2, len(animal_tiles))
-                elif item == "FERTILIZER" and unfert_melon:
-                    reserve = min(len(unfert_melon), stock)
-            avail = max(0, stock - reserve)
-            if avail <= 0: continue
-            dh = _ST.tracker.get_dump_hazard(item)
-            bp = float(MARKET_PARAMS.get(item, {}).get("base", 50))
-            sell_list.append((dh * 100.0 + bp, item, avail))
+            stk = shed.get(item, 0)
+            if stk <= 0 or len(orders) >= 10: continue
+            avail = stk if (item != "WHEAT" or endgame) else max(0, stk - wt_reserve)
+            if avail > 0:
+                orders.append(["SELL", item, avail])
 
-        sell_list.sort(key=lambda x: x[0], reverse=True)
-        for _, item, avail in sell_list:
-            if len(market_orders) >= 10: break
-            if is_endgame or _ST.tracker.get_dump_hazard(item) > 0.35:
-                qty = avail
+        # (B) HIRE — aggressive daily (hands reset each morning)
+        hires_today = int(mf.get("hires_today", 0))
+        max_hands = min(12, len(uq) * 4)
+        while hires_today < max_hands and nh < max_hands and len(orders) < 10:
+            hc = _fib(hires_today)
+            # Keep enough for animal/seed purchases
+            buf = 200 if day >= 3 else 400
+            if money >= hc + buf:
+                orders.append(["HIRE"])
+                money -= hc
+                hires_today += 1
+                nh += 1
             else:
-                ci = market_inv.get(item, MARKET_I0)
-                T = float(MARKET_PARAMS[item]["T"])
-                if item in FRAGILE_COMMODITIES:
-                    headroom = max(1, min(15, int(T * 0.35 - max(0, ci - MARKET_I0))))
-                else:
-                    headroom = max(5, int(T * 0.50))
-                qty = min(avail, headroom)
-            if qty > 0:
-                market_orders.append(["SELL", item, qty])
+                break
 
-        _ST.tracker.record_own_orders(market_orders)
+        # (C) ANIMALS — gradual scaling, 1 per turn max
+        # Top ranker: 13 cows, 3 sheep, 2 geese over 30 days
+        # Scale: buy 1 cow per day for first 10 days, then sheep/goose
+        if len(orders) < 10 and not endgame and dleft >= 8:
+            if day <= 1 and (cow_p + cow_q) == 0 and money >= 500:
+                # First cow on day 0-1
+                orders.append(["BUY_ANIMAL", "COW", 1])
+                money -= 400
+            elif day >= 2 and (cow_p + cow_q) < min(8, day + 1) and cow_q <= 1 and money >= 700 and dleft >= 10:
+                orders.append(["BUY_ANIMAL", "COW", 1])
+                money -= 400
+            elif (sheep_p + sheep_q) < 3 and sheep_q == 0 and money >= 800 and dleft >= 10 and cow_p >= 2:
+                orders.append(["BUY_ANIMAL", "SHEEP", 1])
+                money -= 500
+            elif (goose_p + goose_q) < 2 and goose_q == 0 and money >= 600 and dleft >= 8 and cow_p >= 2:
+                orders.append(["BUY_ANIMAL", "GOOSE", 1])
+                money -= 300
 
-        # (B) LAND EXPANSION (FR-05)
-        next_q = None
+        # (D) BUY WHEAT for animal feed
+        feed_need = total_a + cow_q + sheep_q + goose_q
+        wt_have = shed.get("WHEAT", 0) + sum(iv.get("WHEAT", 0) for iv in invs)
+        if feed_need > 0 and wt_have < feed_need and len(orders) < 10 and not endgame:
+            need = min(feed_need - wt_have + 1, 5)
+            wp = market_price("WHEAT", mkt_inv.get("WHEAT", MARKET_I0))
+            if money >= need * wp + 100:
+                orders.append(["BUY_PRODUCT", "WHEAT", need])
+                money -= need * wp
+
+        # (E) LAND EXPANSION
+        nq = None
         for q in [1, 2, 3]:
             if q not in uq:
-                next_q = q
+                nq = q
                 break
-        n_hands = len(my_farm.get("hands", []))
-        if next_q is not None and len(market_orders) < 10:
-            cost = QUADRANT_COSTS[next_q]
-            npv = 25 * 15.0 * max(0, days_left - 2)
-            buf = {1: 1800, 2: 2000, 3: 2500}.get(next_q, 2000)
-            min_d = {1: 4, 2: 10, 3: 16}.get(next_q, 4)
-            min_h = {1: 1, 2: 2, 3: 3}.get(next_q, 1)
-            ok = (day >= min_d and days_left >= 8 and my_money >= cost + buf
-                  and n_hands >= min_h and npv > 1.25 * cost)
-            if next_q == 3 and posture not in ("AUTARKY", "TRAILING"):
-                ok = False
-            if ok:
-                market_orders.append(["BUY_LAND"])
-                my_money -= cost
+        if nq is not None and len(orders) < 10:
+            cost = QUADRANT_COSTS[nq]
+            md = {1: 5, 2: 10, 3: 16}.get(nq, 5)
+            if day >= md and dleft >= 6 and money >= cost + 800:
+                orders.append(["BUY_LAND"])
+                money -= cost
 
-        # (C) HIRING (FR-07)
-        hires = int(my_farm.get("hires_today", 0))
-        max_cap = min(8, len(uq) * 2)
-        ptasks = (len(urgent_water) + len(ready_harvest) + len(unfed_animals) +
-                  len(harvestable_animal) + len(fert_avail) +
-                  min(len(plantable), sum(seeds.get(c, 0) for c in CROPS)))
-        want = min(max_cap, max(0, (ptasks + 17) // 18))
-        while hires < want and n_hands < max_cap and len(market_orders) < 10 and days_left >= 3:
-            w = _fib(hires)
-            if my_money >= w + 800:
-                market_orders.append(["HIRE"])
-                my_money -= w
-                hires += 1
-                n_hands += 1
-            else:
-                break
+        # (F) SEEDS — buy every turn to keep pipeline full
+        if not endgame and dleft >= 3:
+            plans: list[tuple[str, int]] = []
+            if day <= LAST_PLANT_DAY.get("WHEAT", 30):
+                c = seeds.get("WHEAT", 0)
+                if c < 4: plans.append(("WHEAT", min(4, 4 - c)))
+            if day <= LAST_PLANT_DAY.get("CARROT", 30):
+                c = seeds.get("CARROT", 0)
+                if c < 3: plans.append(("CARROT", min(3, 3 - c)))
+            if dleft >= 12 and day <= LAST_PLANT_DAY.get("STRAWBERRY", 30):
+                c = seeds.get("STRAWBERRY", 0)
+                if c < 2: plans.append(("STRAWBERRY", max(1, 2 - c)))
+            if dleft >= 12 and day <= LAST_PLANT_DAY.get("MELON", 30):
+                c = seeds.get("MELON", 0)
+                if c < 2: plans.append(("MELON", max(1, 2 - c)))
+            if dleft >= 10 and day <= LAST_PLANT_DAY.get("TOMATO", 30):
+                c = seeds.get("TOMATO", 0)
+                if c < 2: plans.append(("TOMATO", max(1, 2 - c)))
 
-        # (D) ANIMAL PURCHASES (FR-12)
-        if (not has_goose_placed and not has_goose_shed and not has_goose_inv
-            and len(market_orders) < 10 and my_money >= 2200
-            and days_left >= 12 and 1 in uq):
-            market_orders.append(["BUY_ANIMAL", "GOOSE", 1])
-            my_money -= 300
+            for crop, qty in plans:
+                if len(orders) >= 10: break
+                cost = qty * CROPS[crop]["seed"]
+                if money >= cost + 100:
+                    orders.append(["BUY_SEED", crop, qty])
+                    money -= cost
 
-        # Cow under AUTARKY/TRAILING
-        has_cow = any(
-            isinstance(tiles[y][x], dict) and tiles[y][x].get("animal") == "COW"
-            for y in range(min(10, len(tiles)))
-            for x in range(min(10, len(tiles[y]) if y < len(tiles) else 0))
-            if isinstance(tiles[y][x], dict)
-        )
-        if (posture in ("AUTARKY", "TRAILING") and not has_cow
-            and shed.get("COW", 0) == 0 and day >= 8 and days_left >= 14
-            and my_money >= 3500 and len(uq) >= 2 and len(market_orders) < 10):
-            market_orders.append(["BUY_ANIMAL", "COW", 1])
-            my_money -= 400
-
-        # (D2) WHEAT FEED
-        lc = len(animal_tiles) + shed.get("GOOSE", 0) + shed.get("COW", 0) + shed.get("SHEEP", 0)
-        if lc > 0 and shed.get("WHEAT", 0) < max(2, lc) and my_money >= 100 and len(market_orders) < 10 and not is_endgame:
-            need = min(max(2, lc) - shed.get("WHEAT", 0), 3)
-            if need > 0:
-                market_orders.append(["BUY_PRODUCT", "WHEAT", need])
-                my_money -= need * market_price("WHEAT", market_inv.get("WHEAT", MARKET_I0))
-
-        # (E) FERTILIZER
-        if (unfert_melon and shed.get("FERTILIZER", 0) == 0
-            and not fert_avail and my_money >= 2500
-            and len(market_orders) < 10 and not is_endgame):
-            market_orders.append(["BUY_PRODUCT", "FERTILIZER", 1])
-            my_money -= market_price("FERTILIZER", market_inv.get("FERTILIZER", MARKET_I0))
-
-        # (F) SEED PURCHASES (FR-08)
-        if not is_endgame and days_left >= 3:
-            if posture == "LEADING":
-                buy_crops = ["WHEAT", "CARROT"]
-            elif posture == "TRAILING":
-                buy_crops = ["MELON", "WHEAT", "CARROT", "TOMATO", "STRAWBERRY"]
-            elif posture == "AUTARKY":
-                buy_crops = ["WHEAT"]
-            else:
-                buy_crops = ["WHEAT", "CARROT", "MELON"]
-
-            for crop in buy_crops:
-                if day > LAST_PLANT_DAY.get(crop, 30): continue
-                if len(market_orders) >= 10: break
-                cur = seeds.get(crop, 0)
-                target_stock = 6 if crop in ("WHEAT", "CARROT") else 2
-                deficit = target_stock - cur
-                if deficit > 0 and my_money >= deficit * CROPS[crop]["seed"] + 500:
-                    market_orders.append(["BUY_SEED", crop, deficit])
-                    my_money -= deficit * CROPS[crop]["seed"]
-
-        # ==== WORKER DISPATCH ====
-        all_workers = [my_farm.get("farmer", [0, 0])] + my_farm.get("hands", [])
-        wactions: list[list[Any]] = []
+        # ---- WORKER DISPATCH ----
+        workers = [mf.get("farmer", [0, 0])] + mf.get("hands", [])
+        acts: list[list[Any]] = []
         claimed: set[tuple[int, int]] = set()
-        seeds_used: dict[str, int] = {}
+        su: dict[str, int] = {}  # seeds used this turn
 
-        for widx, pos in enumerate(all_workers):
-            if (time.perf_counter() - t0) * 1000 > 35:
-                wactions.append(["PASS"])
-                continue
+        # Precompute available pasture/coop build spots
+        p_spots = [s for s in _pasture_spots(uq) if 0 <= s[1] < len(tiles) and 0 <= s[0] < len(tiles[s[1]]) and tiles[s[1]][s[0]] is None]
+        c_spots = [s for s in _coop_spots(uq) if 0 <= s[1] < len(tiles) and 0 <= s[0] < len(tiles[s[1]]) and tiles[s[1]][s[0]] is None]
 
+        for wi, pos in enumerate(workers):
             wx, wy = (pos[0], pos[1]) if isinstance(pos, (list, tuple)) else (0, 0)
             ct = tiles[wy][wx] if 0 <= wy < len(tiles) and 0 <= wx < len(tiles[wy]) else None
-            # Handle LOCKED string tiles — treat as impassable for actions
-            if ct == "LOCKED":
-                ct = None  # normalize for branching; movement is legal, actions are no-ops
-            winv = inventories[widx] if widx < len(inventories) else {}
-            act: list[Any] = ["PASS"]
+            if ct == "LOCKED": ct = None
+            inv = invs[wi] if wi < len(invs) else {}
+            a: list[Any] = ["PASS"]
+            sa = (wx, wy) in SHED_ACCESS_TILES
 
-            is_shed_adj = (wx, wy) in SHED_ACCESS_TILES
-            on_unlocked = _is_unlocked(wx, wy, uq)
+            # --- carrying animal? deliver it ---
+            car = None
+            if inv.get("COW", 0) > 0: car = "COW"
+            elif inv.get("SHEEP", 0) > 0: car = "SHEEP"
+            elif inv.get("GOOSE", 0) > 0: car = "GOOSE"
 
-            # (1) On animal tile — Feed > Care > Collect > Harvest
+            if car is not None:
+                sk = "PASTURE" if car != "GOOSE" else "COOP"
+                # On an empty matching structure? Place it
+                if isinstance(ct, dict) and ct.get("kind") == sk and not ct.get("animal"):
+                    a = ["PLACE", car]
+                else:
+                    # Find empty matching structure
+                    emp = [p for p in estructs
+                           if isinstance(tiles[p[1]][p[0]], dict) and tiles[p[1]][p[0]].get("kind") == sk]
+                    if emp:
+                        tgt = _nearest(wx, wy, emp)
+                        a = _move(wx, wy, tgt[0], tgt[1])
+                    else:
+                        # Need to build — go to build spot
+                        spots = p_spots if sk == "PASTURE" else c_spots
+                        if spots:
+                            bs = _nearest(wx, wy, spots)
+                            if (wx, wy) == bs:
+                                a = ["BUILD_PASTURE"] if sk == "PASTURE" else ["BUILD_COOP"]
+                            else:
+                                a = _move(wx, wy, bs[0], bs[1])
+                        else:
+                            # No spots available, drop animal at shed
+                            if sa:
+                                a = ["DROP", car, 1]
+                            else:
+                                tgt = _nearest(wx, wy, list(SHED_ACCESS_TILES))
+                                a = _move(wx, wy, tgt[0], tgt[1])
+                acts.append(a)
+                continue
+
+            # --- carrying wheat for feed? deliver ---
+            if 0 < inv.get("WHEAT", 0) <= 3 and unfed:
+                tgt = _nearest(wx, wy, unfed)
+                if isinstance(ct, dict) and ct.get("kind") in ("COOP", "PASTURE") and ct.get("animal") and not ct.get("fed_today", False):
+                    a = ["FEED"]
+                else:
+                    a = _move(wx, wy, tgt[0], tgt[1])
+                acts.append(a)
+                continue
+
+            # --- carrying fertilizer? drop at shed ---
+            if inv.get("FERTILIZER", 0) > 0:
+                if sa:
+                    a = ["DROP", "FERTILIZER", inv["FERTILIZER"]]
+                else:
+                    tgt = _nearest(wx, wy, list(SHED_ACCESS_TILES))
+                    a = _move(wx, wy, tgt[0], tgt[1])
+                acts.append(a)
+                continue
+
+            # --- on animal structure with animal ---
             if isinstance(ct, dict) and ct.get("kind") in ("COOP", "PASTURE") and ct.get("animal"):
-                if not ct.get("fed_today", False) and winv.get("WHEAT", 0) > 0:
-                    act = ["FEED"]
+                if not ct.get("fed_today", False) and inv.get("WHEAT", 0) > 0:
+                    a = ["FEED"]
                 elif not ct.get("cared_today", False):
-                    act = ["CARE"]
+                    a = ["CARE"]
                 elif ct.get("fertilizer_available", False):
-                    act = ["COLLECT_FERTILIZER"]
+                    a = ["COLLECT_FERTILIZER"]
                 elif ct.get("yield_units", 0) > 0:
-                    act = ["HARVEST"]
-                elif not ct.get("fed_today", False) and shed.get("WHEAT", 0) > 0:
-                    act = _step_towards(wx, wy, 4, 4)
+                    a = ["HARVEST"]
                 else:
-                    tgt = _find_target(wx, wy, urgent_water, ready_harvest, plantable, unfed_animals, claimed)
-                    act = _step_towards(wx, wy, tgt[0], tgt[1])
+                    a = _move(wx, wy, *_work(wx, wy, water, harvest, empty, unfed, afert, aharvest, claimed))
+                acts.append(a)
+                continue
 
-            # (2) On empty structure — place animal if carrying one
-            elif isinstance(ct, dict) and ct.get("kind") in ("COOP", "PASTURE") and not ct.get("animal"):
-                if winv.get("GOOSE", 0) > 0 and ct.get("kind") == "COOP":
-                    act = ["PLACE", "GOOSE"]
-                elif winv.get("COW", 0) > 0 and ct.get("kind") == "PASTURE":
-                    act = ["PLACE", "COW"]
-                elif winv.get("SHEEP", 0) > 0 and ct.get("kind") == "PASTURE":
-                    act = ["PLACE", "SHEEP"]
-                else:
-                    tgt = _find_target(wx, wy, urgent_water, ready_harvest, plantable, unfed_animals, claimed)
-                    act = _step_towards(wx, wy, tgt[0], tgt[1])
+            # --- on empty structure without animal ---
+            if isinstance(ct, dict) and ct.get("kind") in ("COOP", "PASTURE") and not ct.get("animal"):
+                a = _move(wx, wy, *_work(wx, wy, water, harvest, empty, unfed, afert, aharvest, claimed))
+                acts.append(a)
+                continue
 
-            # (3) On plant tile — Water > Harvest > Fertilize
-            elif isinstance(ct, dict) and ct.get("kind") == "PLANT":
-                crop = ct.get("crop", "WHEAT")
-                cd = CROPS.get(crop, CROPS["WHEAT"])
+            # --- on plant ---
+            if isinstance(ct, dict) and ct.get("kind") == "PLANT":
+                cr = ct.get("crop", "WHEAT")
+                cd = CROPS.get(cr, CROPS["WHEAT"])
                 age = day - ct.get("planted_day", 0)
                 if not ct.get("watered_today", False):
-                    act = ["WATER"]
+                    a = ["WATER"]
                     claimed.add((wx, wy))
                 elif age >= cd["first_yield_day"] and (
-                    ct.get("yield_units", 0) >= cd["max_yield"] or age >= cd["max_yield_day"] or days_left <= 2):
-                    act = ["HARVEST"]
+                    ct.get("yield_units", 0) >= cd["max_yield"] or age >= cd["max_yield_day"] or dleft <= 2):
+                    a = ["HARVEST"]
                     claimed.add((wx, wy))
-                elif crop == "MELON" and winv.get("FERTILIZER", 0) > 0 and ct.get("fertilized_until_day", -1) < day:
-                    act = ["FERTILIZE"]
                 else:
-                    tgt = _find_target(wx, wy, urgent_water, ready_harvest, plantable, unfed_animals, claimed)
-                    act = _step_towards(wx, wy, tgt[0], tgt[1])
+                    a = _move(wx, wy, *_work(wx, wy, water, harvest, empty, unfed, afert, aharvest, claimed))
+                acts.append(a)
+                continue
 
-            # (4) On weed — dig it
-            elif isinstance(ct, dict) and ct.get("kind") == "WEED":
-                act = ["DIG"]
+            # --- on weed ---
+            if isinstance(ct, dict) and ct.get("kind") == "WEED":
+                a = ["DIG"]
+                acts.append(a)
+                continue
 
-            # (5) On empty tile (or shed-adjacent tile that is empty/locked)
-            elif ct is None:
-                # First check: if shed-adjacent, try PICKUP if there's something useful
-                pickup_done = False
-                if is_shed_adj:
-                    if shed.get("GOOSE", 0) > 0 and winv.get("GOOSE", 0) == 0:
-                        has_ec = any(isinstance(tiles[ey][ex], dict) and tiles[ey][ex].get("kind") == "COOP"
-                                     for ex, ey in empty_structs)
-                        if has_ec:
-                            act = ["PICKUP", "GOOSE", 1]
-                            pickup_done = True
-                    if not pickup_done and shed.get("COW", 0) > 0 and winv.get("COW", 0) == 0:
-                        has_ep = any(isinstance(tiles[ey][ex], dict) and tiles[ey][ex].get("kind") == "PASTURE"
-                                     for ex, ey in empty_structs)
-                        if has_ep:
-                            act = ["PICKUP", "COW", 1]
-                            pickup_done = True
-                    if not pickup_done and shed.get("WHEAT", 0) > 0 and winv.get("WHEAT", 0) == 0 and unfed_animals:
-                        act = ["PICKUP", "WHEAT", 1]
-                        pickup_done = True
-                    if not pickup_done and shed.get("FERTILIZER", 0) > 0 and winv.get("FERTILIZER", 0) == 0 and unfert_melon:
-                        act = ["PICKUP", "FERTILIZER", 1]
-                        pickup_done = True
-
-                # If nothing to pick up, try building or planting (only on unlocked tiles)
-                if not pickup_done and on_unlocked:
-                    if (has_goose_shed or has_goose_inv) and not has_any_struct and (wx, wy) == (4, 3):
-                        act = ["BUILD_COOP"]
-                    elif shed.get("COW", 0) > 0 and not any(
-                        isinstance(tiles[ey][ex], dict) and tiles[ey][ex].get("kind") == "PASTURE"
-                        for ex, ey in all_structs):
-                        if (wx, wy) == (3, 3):
-                            act = ["BUILD_PASTURE"]
-                        else:
-                            act = _step_towards(wx, wy, 3, 3)
-                    elif days_left >= 3 and not is_endgame:
-                        planted = False
-                        for crop in _get_plant_order(posture, day, days_left, shed):
-                            real = seeds.get(crop, 0) - seeds_used.get(crop, 0)
-                            if real > 0 and day <= LAST_PLANT_DAY.get(crop, 30):
-                                act = ["PLANT", crop]
-                                seeds_used[crop] = seeds_used.get(crop, 0) + 1
-                                planted = True
+            # --- on empty tile ---
+            if ct is None:
+                # Shed-adjacent: pick up animals or wheat
+                if sa:
+                    picked = False
+                    for atype, sk in [("COW", "PASTURE"), ("SHEEP", "PASTURE"), ("GOOSE", "COOP")]:
+                        if shed.get(atype, 0) > 0:
+                            # Check we have somewhere to put it
+                            emp = [p for p in estructs
+                                   if isinstance(tiles[p[1]][p[0]], dict) and tiles[p[1]][p[0]].get("kind") == sk]
+                            bspots = p_spots if sk == "PASTURE" else c_spots
+                            if emp or bspots:
+                                a = ["PICKUP", atype, 1]
+                                picked = True
                                 break
-                        if not planted:
-                            tgt = _find_target(wx, wy, urgent_water, ready_harvest, plantable, unfed_animals, claimed)
-                            act = _step_towards(wx, wy, tgt[0], tgt[1])
+                    if not picked and shed.get("WHEAT", 0) > 0 and unfed:
+                        a = ["PICKUP", "WHEAT", min(shed.get("WHEAT", 0), 3)]
+                        picked = True
+                    if not picked:
+                        # Check if we need to build a structure here
+                        if need_pasture > 0 and (wx, wy) in p_spots:
+                            a = ["BUILD_PASTURE"]
+                            need_pasture -= 1
+                        elif need_coop > 0 and (wx, wy) in c_spots:
+                            a = ["BUILD_COOP"]
+                            need_coop -= 1
+                        elif _unlocked(wx, wy, uq) and not endgame and dleft >= 3:
+                            a = _plant(seeds, su, day, dleft)
+                            if a[0] == "PLANT":
+                                su[a[1]] = su.get(a[1], 0) + 1
+                            else:
+                                a = _move(wx, wy, *_work(wx, wy, water, harvest, empty, unfed, afert, aharvest, claimed))
+                        else:
+                            a = _move(wx, wy, *_work(wx, wy, water, harvest, empty, unfed, afert, aharvest, claimed))
+                # Not shed-adjacent: build structure if needed, else plant/work
+                elif _unlocked(wx, wy, uq):
+                    if need_pasture > 0 and (wx, wy) in p_spots:
+                        a = ["BUILD_PASTURE"]
+                        need_pasture -= 1
+                    elif need_coop > 0 and (wx, wy) in c_spots:
+                        a = ["BUILD_COOP"]
+                        need_coop -= 1
+                    elif not endgame and dleft >= 3:
+                        a = _plant(seeds, su, day, dleft)
+                        if a[0] == "PLANT":
+                            su[a[1]] = su.get(a[1], 0) + 1
+                        else:
+                            a = _move(wx, wy, *_work(wx, wy, water, harvest, empty, unfed, afert, aharvest, claimed))
                     else:
-                        tgt = _find_target(wx, wy, urgent_water, ready_harvest, plantable, unfed_animals, claimed)
-                        act = _step_towards(wx, wy, tgt[0], tgt[1])
-
-                # If on locked tile with nothing to pick up, navigate to useful area
-                elif not pickup_done:
-                    tgt = _find_target(wx, wy, urgent_water, ready_harvest, plantable, unfed_animals, claimed)
-                    act = _step_towards(wx, wy, tgt[0], tgt[1])
-
-            # (6) Fallback navigation (carrying items or on unexpected tile)
-            else:
-                if winv.get("WHEAT", 0) > 0 and unfed_animals:
-                    tgt = _nearest(wx, wy, unfed_animals)
-                elif winv.get("FERTILIZER", 0) > 0 and unfert_melon:
-                    tgt = _nearest(wx, wy, unfert_melon)
-                elif winv.get("GOOSE", 0) > 0:
-                    ec = [p for p in empty_structs
-                          if isinstance(tiles[p[1]][p[0]], dict) and tiles[p[1]][p[0]].get("kind") == "COOP"]
-                    tgt = _nearest(wx, wy, ec) if ec else (4, 3)
-                elif winv.get("COW", 0) > 0:
-                    ep = [p for p in empty_structs
-                          if isinstance(tiles[p[1]][p[0]], dict) and tiles[p[1]][p[0]].get("kind") == "PASTURE"]
-                    tgt = _nearest(wx, wy, ep) if ep else (3, 3)
-                elif (has_goose_shed or has_goose_inv) and not has_any_struct:
-                    tgt = (4, 3)
-                elif has_goose_shed and empty_structs:
-                    tgt = (4, 4)
-                elif unfed_animals and shed.get("WHEAT", 0) > 0:
-                    tgt = (4, 4)
-                elif unfert_melon and shed.get("FERTILIZER", 0) > 0:
-                    tgt = (4, 4)
+                        a = _move(wx, wy, *_work(wx, wy, water, harvest, empty, unfed, afert, aharvest, claimed))
                 else:
-                    tgt = _find_target(wx, wy, urgent_water, ready_harvest, plantable, unfed_animals, claimed)
-                act = _step_towards(wx, wy, tgt[0], tgt[1])
+                    a = _move(wx, wy, *_work(wx, wy, water, harvest, empty, unfed, afert, aharvest, claimed))
+                acts.append(a)
+                continue
 
-            wactions.append(act)
+            # --- fallback ---
+            a = _move(wx, wy, *_work(wx, wy, water, harvest, empty, unfed, afert, aharvest, claimed))
+            acts.append(a)
 
-        # ==== ASSEMBLE OUTPUT ====
-        farmer = wactions[0] if wactions else ["PASS"]
-        hands = wactions[1:] if len(wactions) > 1 else []
-
-        if (time.perf_counter() - t0) * 1000 > 40:
-            return FALLBACK
+        farmer = acts[0] if acts else ["PASS"]
+        hands = acts[1:] if len(acts) > 1 else []
 
         return {
             "farmer": list(farmer),
             "hands": [list(h) for h in hands],
-            "market": market_orders[:10],
+            "market": orders[:10],
         }
-
     except Exception:
-        return FALLBACK
+        return FB
+
