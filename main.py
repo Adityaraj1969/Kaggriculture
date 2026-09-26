@@ -153,11 +153,18 @@ _ST = _S()
 
 def _plant(seeds: dict, su: dict, day: int, dleft: int) -> list[Any]:
     order = []
+    if day >= 8:
+        # Mid/late game: plant high-value crops first if available
+        if dleft >= 12: order.append("STRAWBERRY")
+        if dleft >= 12: order.append("MELON")
+        if dleft >= 10: order.append("TOMATO")
     if dleft >= 3: order.append("WHEAT")
     if dleft >= 3: order.append("CARROT")
-    if dleft >= 12: order.append("STRAWBERRY")
-    if dleft >= 12: order.append("MELON")
-    if dleft >= 10: order.append("TOMATO")
+    if day < 8:
+        # Early game: high-value as fallback if we have seeds
+        if dleft >= 12: order.append("STRAWBERRY")
+        if dleft >= 12: order.append("MELON")
+        if dleft >= 10: order.append("TOMATO")
     for c in order:
         if day > LAST_PLANT_DAY.get(c, 30): continue
         if seeds.get(c, 0) - su.get(c, 0) > 0:
@@ -364,13 +371,13 @@ def agent(obs: dict[str, Any], config: dict[str, Any] | None = None) -> dict[str
             if day <= LAST_PLANT_DAY.get("CARROT", 30):
                 c = seeds.get("CARROT", 0)
                 if c < 3: plans.append(("CARROT", min(3, 3 - c)))
-            if dleft >= 12 and day <= LAST_PLANT_DAY.get("STRAWBERRY", 30):
+            if dleft >= 12 and day <= LAST_PLANT_DAY.get("STRAWBERRY", 30) and money >= 500:
                 c = seeds.get("STRAWBERRY", 0)
-                if c < 2: plans.append(("STRAWBERRY", max(1, 2 - c)))
-            if dleft >= 12 and day <= LAST_PLANT_DAY.get("MELON", 30):
+                if c < 3: plans.append(("STRAWBERRY", max(1, 3 - c)))
+            if dleft >= 12 and day <= LAST_PLANT_DAY.get("MELON", 30) and money >= 500:
                 c = seeds.get("MELON", 0)
-                if c < 2: plans.append(("MELON", max(1, 2 - c)))
-            if dleft >= 10 and day <= LAST_PLANT_DAY.get("TOMATO", 30):
+                if c < 3: plans.append(("MELON", max(1, 3 - c)))
+            if dleft >= 10 and day <= LAST_PLANT_DAY.get("TOMATO", 30) and money >= 400:
                 c = seeds.get("TOMATO", 0)
                 if c < 2: plans.append(("TOMATO", max(1, 2 - c)))
 
